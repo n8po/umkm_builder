@@ -18,13 +18,14 @@ const translations: Record<Locale, Record<string, string>> = {
     // Buttons
     'buttons.signIn': 'Sign In',
     'buttons.getStarted': 'Get Started',
+    'buttons.seeHowItWorks': 'See How It Works',
     // Product links
     'product.websiteBuilder.title': 'Website Builder',
-    'product.websiteBuilder.description': 'Create responsive websites with ease',
-    'product.cloudPlatform.title': 'Cloud Platform',
-    'product.cloudPlatform.description': 'Deploy and scale apps in the cloud',
+    'product.websiteBuilder.description': 'Create a website for your product responsively and easily',
+    'product.cloudPlatform.title': 'Deploy Website',
+    'product.cloudPlatform.description': 'Publish your site to the internet',
     'product.analytics.title': 'Analytics',
-    'product.analytics.description': 'Track and analyze your website traffic',
+    'product.analytics.description': 'Conventional and Contemporary Cost Accounting',
     // Company links
     'company.aboutUs.title': 'About Us',
     'company.aboutUs.description': 'Learn more about our story and team',
@@ -34,8 +35,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'company.privacy': 'Privacy Policy',
     'company.refund': 'Refund Policy',
     // Home
-    'home.welcome': 'Welcome',
-    'home.description': 'This is a demo layout. Add your content here.',
+    'home.welcome': 'Creating an MSME website is as easy as sending a chat',
+    'home.description': 'Write an idea, choose a category, and your website will be online. Let AI do the work for you.',
+    // AI Prompt
+    'home.aiPromptPlaceholder': 'Looking for quick answers or personalized?',
     // Languages
     'lang.english': 'English',
     'lang.indonesian': 'Bahasa Indonesia',
@@ -48,13 +51,14 @@ const translations: Record<Locale, Record<string, string>> = {
     // Buttons
     'buttons.signIn': 'Masuk',
     'buttons.getStarted': 'Mulai Sekarang',
+    'buttons.seeHowItWorks': 'Lihat Cara Kerjanya',
     // Product links
     'product.websiteBuilder.title': 'Pembuat Website',
-    'product.websiteBuilder.description': 'Buat website responsif dengan mudah',
-    'product.cloudPlatform.title': 'Platform Cloud',
-    'product.cloudPlatform.description': 'Deploy dan scaling aplikasi di cloud',
+    'product.websiteBuilder.description': 'Buat website untuk produk anda dengan responsif dan mudah',
+    'product.cloudPlatform.title': 'Publish Website',
+    'product.cloudPlatform.description': 'Publikasiakan situs anda ke internet',
     'product.analytics.title': 'Analitik',
-    'product.analytics.description': 'Lacak dan analisis traffic website Anda',
+    'product.analytics.description': 'Akutansi biaya konvesional dan Kontemporer',
     // Company links
     'company.aboutUs.title': 'Tentang Kami',
     'company.aboutUs.description': 'Pelajari lebih lanjut tentang cerita dan tim kami',
@@ -64,8 +68,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'company.privacy': 'Kebijakan Privasi',
     'company.refund': 'Kebijakan Pengembalian Dana',
     // Home
-    'home.welcome': 'Selamat Datang',
-    'home.description': 'Ini adalah layout demo. Tambahkan konten Anda di sini.',
+    'home.welcome': 'Bikin Website UMKM Semudah Kirim Chat',
+    'home.description': 'Tulis ide, pilih kategori, website langsung online. Biarkan AI yang bekerja untukmu.',
+    // AI Prompt
+    'home.aiPromptPlaceholder': 'Ketik jawaban instan & personal?',
     // Languages
     'lang.english': 'English',
     'lang.indonesian': 'Bahasa Indonesia',

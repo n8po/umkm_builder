@@ -25,7 +25,7 @@ export function LinkItem({
 
 	return (
 		<a
-			className={cn("flex gap-x-2 rounded-md p-2 hover:bg-accent", className)}
+			className={cn("flex gap-x-2 rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800", className)}
 			href={href}
 			{...props}
 		>

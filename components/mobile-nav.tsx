@@ -9,6 +9,8 @@ import { createPortal } from "react-dom";
 import { useLanguage } from "@/lib/language-context";
 import { companyLinks, companyLinks2, productLinks } from "@/components/nav-links";
 import { LinkItem } from "@/components/shared";
+import { LanguageSelectorDropdown } from "@/components/language-selector-dropdown";
+import { ThemeTabs } from "@/components/theme-tabs";
 
 export function MobileNav() {
 	const [open, setOpen] = React.useState(false);
@@ -72,6 +74,12 @@ export function MobileNav() {
 							)}
 							data-slot={open ? "open" : "closed"}
 						>
+							{/* Language + Theme Row - At Top */}
+							<div className="mb-4 flex items-center justify-between gap-2 pb-3 border-b">
+								<LanguageSelectorDropdown />
+								<ThemeTabs />
+							</div>
+							
 							<div className="flex w-full flex-col gap-y-2">
 								<span className="text-sm">{t('nav.product')}</span>
 								{productLinks.map((link) => (
@@ -85,18 +93,24 @@ export function MobileNav() {
 									<a
 										key={`company2-${link.labelKey}`}
 										href={link.href}
-										className="flex items-center gap-x-2 rounded-md p-2 hover:bg-accent"
+										className="flex items-center gap-x-2 rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
 									>
 										<link.icon className="size-4" />
 										<span>{t(`company.${link.labelKey}`)}</span>
 									</a>
 								))}
 							</div>
-							<div className="mt-5 flex flex-col gap-2">
-								<Button className="w-full" variant="outline">
+							<div className="mt-2 flex flex-col gap-2">
+								{/* Action Buttons */}
+								<Button 
+									className="w-full border-black dark:border-white text-black dark:text-white bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800" 
+									variant="outline"
+								>
 									{t('buttons.signIn')}
 								</Button>
-								<Button className="w-full">{t('buttons.getStarted')}</Button>
+								<Button className="w-full bg-blue-600 text-white dark:bg-blue-700 dark:text-white hover:bg-blue-700 dark:hover:bg-blue-800">
+									{t('buttons.getStarted')}
+								</Button>
 							</div>
 						</div>
 					</div>,

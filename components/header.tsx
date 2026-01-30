@@ -7,8 +7,8 @@ import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 import { DesktopNav } from "@/components/desktop-nav";
 import { MobileNav } from "@/components/mobile-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { LanguageSelectorDropdown } from "@/components/language-selector-dropdown";
+import { ThemeTabs } from "@/components/theme-tabs";
 
 export function Header() {
 	const scrolled = useScroll(10);
@@ -16,6 +16,7 @@ export function Header() {
 
 	return (
 		<header
+			suppressHydrationWarning
 			className={cn("sticky top-0 z-50 w-full border-transparent border-b", {
 				"border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/50":
 					scrolled,
@@ -23,16 +24,26 @@ export function Header() {
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
 				<div className="flex items-center gap-5">
-					<a className="rounded-md px-3 py-2.5 hover:bg-accent" href="#">
+					<a 
+						className="rounded-md px-3 py-2.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" 
+						href="#"
+					>
 						<Logo className="h-4" />
 					</a>
 					<DesktopNav />
 				</div>
 				<div className="hidden items-center gap-2 md:flex">
-					<LanguageSwitcher />
-					<ThemeToggle />
-					<Button variant="outline">{t('buttons.signIn')}</Button>
-					<Button>{t('buttons.getStarted')}</Button>
+					<LanguageSelectorDropdown />
+					<ThemeTabs />
+					<Button 
+						variant="outline" 
+						className="border-black dark:border-white text-black dark:text-white bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
+					>
+						{t('buttons.signIn')}
+					</Button>
+					<Button className="bg-blue-600 text-white dark:bg-blue-700 dark:text-white hover:bg-blue-700 dark:hover:bg-blue-800">
+						{t('buttons.getStarted')}
+					</Button>
 				</div>
 				<MobileNav />
 			</nav>

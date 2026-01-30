@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/language-context";
 import {
 	NavigationMenu,
@@ -14,6 +15,17 @@ import { LinkItem } from "@/components/shared";
 
 export function DesktopNav() {
 	const { t } = useLanguage();
+	const [isMounted, setIsMounted] = useState(false);
+
+	useEffect(() => {
+		React.startTransition(() => {
+			setIsMounted(true);
+		});
+	}, []);
+
+	if (!isMounted) {
+		return <div className="hidden md:block w-64" />;
+	}
 
 	return (
 		<NavigationMenu className="hidden md:flex">
@@ -56,12 +68,12 @@ export function DesktopNav() {
 							<div className="space-y-2 p-3">
 								{companyLinks2.map((item, i) => (
 									<NavigationMenuLink
-										className="flex-row items-center gap-x-2"
+										className="flex items-center gap-x-2 rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
 										href={item.href}
 										key={`item-${item.labelKey}-${i}`}
 									>
 										<item.icon className="size-4 text-foreground" />
-										<span className="font-medium">{t(`company.${item.labelKey}`)}</span>
+										<span className="font-medium text-sm">{t(`company.${item.labelKey}`)}</span>
 									</NavigationMenuLink>
 								))}
 							</div>
@@ -69,7 +81,7 @@ export function DesktopNav() {
 					</NavigationMenuContent>
 				</NavigationMenuItem>
 				<NavigationMenuLink asChild className="px-4">
-					<a className="rounded-md p-2 hover:bg-accent" href="#">
+					<a className="rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
 						{t('nav.pricing')}
 					</a>
 				</NavigationMenuLink>
