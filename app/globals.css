@@ -48,6 +48,12 @@
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
   }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
 }
 
 @theme inline {
