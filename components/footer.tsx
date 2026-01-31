@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
@@ -18,6 +20,7 @@ interface FooterProps {
     icon: React.ReactElement;
     href: string;
     label: string;
+    hoverClass?: string;
   }>;
   copyright?: string;
   legalLinks?: Array<{
@@ -26,41 +29,11 @@ interface FooterProps {
   }>;
 }
 
-const defaultSections = [
-  {
-    title: "Product",
-    links: [
-      { name: "Overview", href: "#" },
-      { name: "Pricing", href: "#" },
-      { name: "Marketplace", href: "#" },
-      { name: "Features", href: "#" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "About", href: "#" },
-      { name: "Team", href: "#" },
-      { name: "Blog", href: "#" },
-      { name: "Careers", href: "#" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { name: "Help", href: "#" },
-      { name: "Sales", href: "#" },
-      { name: "Advertise", href: "#" },
-      { name: "Privacy", href: "#" },
-    ],
-  },
-];
-
 const defaultSocialLinks = [
-  { icon: <FaInstagram className="size-5" />, href: "#", label: "Instagram" },
-  { icon: <FaFacebook className="size-5" />, href: "#", label: "Facebook" },
-  { icon: <FaTwitter className="size-5" />, href: "#", label: "Twitter" },
-  { icon: <FaLinkedin className="size-5" />, href: "#", label: "LinkedIn" },
+  { icon: <FaInstagram className="size-5" />, href: "#", label: "Instagram", hoverClass: "hover:text-pink-500 dark:hover:text-pink-400" },
+  { icon: <FaFacebook className="size-5" />, href: "#", label: "Facebook", hoverClass: "hover:text-blue-600 dark:hover:text-blue-500" },
+  { icon: <FaTwitter className="size-5" />, href: "#", label: "Twitter", hoverClass: "hover:text-sky-500 dark:hover:text-sky-400" },
+  { icon: <FaLinkedin className="size-5" />, href: "#", label: "LinkedIn", hoverClass: "hover:text-blue-700 dark:hover:text-blue-600" },
 ];
 
 const defaultLegalLinks = [
@@ -68,19 +41,55 @@ const defaultLegalLinks = [
   { name: "Privacy Policy", href: "#" },
 ];
 
+import { useLanguage } from "@/lib/language-context";
+
 export const Footer = ({
   logo = {
     url: "https://www.shadcnblocks.com",
     src: "https://www.shadcnblocks.com/images/block/logos/shadcnblockscom-icon.svg",
     alt: "logo",
-    title: "Shadcnblocks.com",
+    title: "UMKM-Builder.cloud",
   },
-  sections = defaultSections,
-  description = "A collection of components for your startup business or side project.",
   socialLinks = defaultSocialLinks,
-  copyright = "© 2024 Shadcnblocks.com. All rights reserved.",
+  copyright = "© 2026 UMKM-Builder.cloud. All rights reserved.",
   legalLinks = defaultLegalLinks,
+  // Note: sections and description props are handled inside to support translation defaults
+  sections,
+  description,
 }: FooterProps) => {
+  const { t } = useLanguage();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Or return a skeleton/loading state matching server output structure if strict SEO is needed, but null wraps it safely for now
+  }
+
+  const effectiveDescription = description || t('footer.description');
+  
+  const defaultSectionsTranslated = [
+    {
+      title: t('nav.product'),
+      links: [
+        { name: t('nav.overview'), href: "#" },
+        { name: t('nav.pricing'), href: "#" },
+        { name: t('nav.features'), href: "#" },
+      ],
+    },
+    {
+      title: t('nav.company'),
+      links: [
+        { name: t('company.aboutUs.title'), href: "#" },
+        { name: t('testimonials.label'), href: "#" },
+      ],
+    },
+  ];
+
+  const effectiveSections = sections || defaultSectionsTranslated;
+
   return (
     <section className="py-32">
       <div className="container mx-auto">
@@ -101,11 +110,11 @@ export const Footer = ({
               <h2 className="text-xl font-semibold">{logo.title}</h2>
             </div>
             <p className="max-w-[70%] text-sm text-muted-foreground">
-              {description}
+              {effectiveDescription}
             </p>
             <ul className="flex items-center space-x-6 text-muted-foreground">
               {socialLinks.map((social, idx) => (
-                <li key={idx} className="font-medium hover:text-primary">
+                <li key={idx} className={`font-medium transition-colors ${social.hoverClass || "hover:text-primary"}`}>
                   <a href={social.href} aria-label={social.label}>
                     {social.icon}
                   </a>
@@ -114,7 +123,7 @@ export const Footer = ({
             </ul>
           </div>
           <div className="grid w-full gap-6 md:grid-cols-3 lg:gap-20">
-            {sections.map((section, sectionIdx) => (
+            {effectiveSections.map((section, sectionIdx) => (
               <div key={sectionIdx}>
                 <h3 className="mb-4 font-bold">{section.title}</h3>
                 <ul className="space-y-3 text-sm text-muted-foreground">

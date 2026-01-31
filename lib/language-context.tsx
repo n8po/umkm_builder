@@ -59,6 +59,10 @@ const translations: Record<Locale, Record<string, string>> = {
     // Languages
     'lang.english': 'English',
     'lang.indonesian': 'Bahasa Indonesia',
+    // Footer
+    'footer.description': 'Empowering MSMEs to build professional websites instantly. Write your idea, let AI do the work, and go online in seconds.',
+    'nav.features': 'Features',
+    'nav.overview': 'Overview',
   },
   id: {
     // Navigation
@@ -109,6 +113,10 @@ const translations: Record<Locale, Record<string, string>> = {
     // Languages
     'lang.english': 'English',
     'lang.indonesian': 'Bahasa Indonesia',
+    // Footer
+    'footer.description': 'Memberdayakan UMKM untuk membuat website profesional secara instan. Tulis ide Anda, biarkan AI bekerja, dan online dalam hitungan detik.',
+    'nav.features': 'Fitur',
+    'nav.overview': 'Ringkasan',
   },
 };
 
