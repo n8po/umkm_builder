@@ -4,6 +4,7 @@ import Image from "next/image";
 import React from "react";
 import { Timeline } from "@/components/ui/timeline";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 import { useLanguage } from "@/lib/language-context";
 
@@ -157,6 +158,7 @@ export function TimelineDemo() {
       <div className="w-full">
         <Timeline data={data} />
       </div>
+      <Footer />
     </>
   );
 }

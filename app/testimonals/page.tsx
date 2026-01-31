@@ -1,6 +1,7 @@
 "use client";
 
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { TestimonialsColumn } from "@/components/testimonials-columns-1";
 import { motion } from "motion/react";
 import { useLanguage } from "@/lib/language-context";
@@ -103,6 +104,7 @@ const Testimonials = () => {
         </div>
       </div>
     </section>
+    <Footer />
     </>
   );
 };
