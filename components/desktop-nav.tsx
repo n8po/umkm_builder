@@ -34,7 +34,7 @@ export function DesktopNav() {
 					<NavigationMenuTrigger className="bg-transparent">
 						{t('nav.product')}
 					</NavigationMenuTrigger>
-					<NavigationMenuContent className="bg-muted/50 p-1 pr-1.5 dark:bg-background">
+					<NavigationMenuContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-1 pr-1.5 shadow-xl">
 						<div className="grid w-lg grid-cols-2 gap-2 rounded-md border bg-popover p-2 shadow">
 							{productLinks.map((item, i) => (
 								<NavigationMenuLink
@@ -52,7 +52,7 @@ export function DesktopNav() {
 					<NavigationMenuTrigger className="bg-transparent">
 						{t('nav.company')}
 					</NavigationMenuTrigger>
-					<NavigationMenuContent className="bg-muted/50 p-1 pr-1.5 pb-1.5 dark:bg-background">
+					<NavigationMenuContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-1 pr-1.5 pb-1.5 shadow-xl">
 						<div className="grid w-lg grid-cols-2 gap-2">
 							<div className="space-y-2 rounded-md border bg-popover p-2 shadow">
 								{companyLinks.map((item, i) => (
@@ -68,7 +68,7 @@ export function DesktopNav() {
 							<div className="space-y-2 p-3">
 								{companyLinks2.map((item, i) => (
 									<NavigationMenuLink
-										className="flex items-center gap-x-2 rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+										className="flex items-center gap-x-2 rounded-md p-2 transition-colors hover:bg-blue-50 dark:hover:bg-zinc-800"
 										href={item.href}
 										key={`item-${item.labelKey}-${i}`}
 									>
@@ -81,7 +81,7 @@ export function DesktopNav() {
 					</NavigationMenuContent>
 				</NavigationMenuItem>
 				<NavigationMenuLink asChild className="px-4">
-					<a className="rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+					<a className="rounded-md p-2 transition-colors hover:bg-blue-50 dark:hover:bg-zinc-800" href="#">
 						{t('nav.pricing')}
 					</a>
 				</NavigationMenuLink>

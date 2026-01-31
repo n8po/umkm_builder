@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useScroll } from "@/hooks/use-scroll";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -17,19 +18,21 @@ export function Header() {
 	return (
 		<header
 			suppressHydrationWarning
-			className={cn("sticky top-0 z-50 w-full border-transparent border-b", {
-				"border-border bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/50":
-					scrolled,
-			})}
+			className={cn(
+				"sticky top-0 z-50 w-full border-b bg-white dark:bg-zinc-950 dark:border-zinc-800",
+				{
+					"shadow-sm": scrolled,
+				}
+			)}
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
 				<div className="flex items-center gap-5">
-					<a 
+					<Link 
 						className="rounded-md px-3 py-2.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" 
-						href="#"
+						href="/"
 					>
 						<Logo className="h-4" />
-					</a>
+					</Link>
 					<DesktopNav />
 				</div>
 				<div className="hidden items-center gap-2 md:flex">

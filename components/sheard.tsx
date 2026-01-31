@@ -1,31 +1,24 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
-import { useLanguage } from "@/lib/language-context";
 
 export type LinkItemType = {
-	labelKey: string;
+	label: string;
 	href: string;
 	icon: LucideIcon;
-	descriptionKey?: string;
-	type?: 'product' | 'company';
+	description?: string;
 };
 
 export function LinkItem({
-	labelKey,
-	descriptionKey,
+	label,
+	description,
 	icon: Icon,
 	className,
 	href,
-	type = 'product',
 	...props
 }: React.ComponentProps<"a"> & LinkItemType) {
-	const { t } = useLanguage();
-
 	return (
 		<a
-			className={cn("flex gap-x-2 rounded-md p-2 transition-colors hover:bg-blue-50 dark:hover:bg-zinc-800", className)}
+			className={cn("flex gap-x-2 rounded-md p-2 hover:bg-accent", className)}
 			href={href}
 			{...props}
 		>
@@ -33,12 +26,10 @@ export function LinkItem({
 				<Icon className="size-5 text-foreground" />
 			</div>
 			<div className="flex flex-col items-start justify-center">
-				<span className="font-medium">{t(`${type}.${labelKey}.title`)}</span>
-				{descriptionKey && (
-					<span className="line-clamp-2 text-muted-foreground text-xs">
-						{t(`${type}.${labelKey}.description`)}
-					</span>
-				)}
+				<span className="font-medium">{label}</span>
+				<span className="line-clamp-2 text-muted-foreground text-xs">
+					{description}
+				</span>
 			</div>
 		</a>
 	);

@@ -39,6 +39,23 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.description': 'Write an idea, choose a category, and your website will be online. Let AI do the work for you.',
     // AI Prompt
     'home.aiPromptPlaceholder': 'Looking for quick answers or personalized?',
+    // Timeline
+    'timeline.title': 'Web Automation Innovation',
+    'timeline.desc1': 'Transforming simple conversations into digital identities.',
+    'timeline.desc2_part1': 'We are dedicated to helping Indonesian MSMEs have a professional appearance instantly through the power of',
+    // About
+    'about.whoWeAre.title': 'Who We Are',
+    'about.whoWeAre.desc1': 'We are a team of innovators who believe that the future of web development is automation.',
+    'about.whoWeAre.desc2': 'Efferd is not just a tool, but a smart assistant for your business.',
+    'about.whatWeDo.title': 'What We Do',
+    'about.whatWeDo.desc1': 'We turn abstract ideas into functional websites in seconds, without complex lines of code.',
+    'about.whatWeDo.desc2': 'Just type your vision, and our AI will translate it into stunning layouts, content, and designs.',
+    'about.vision.title': 'Our Vision',
+    'about.vision.desc': 'To be the fastest digital bridge for MSMEs to reach the global market.',
+    // Testimonials
+    'testimonials.label': 'Testimonials',
+    'testimonials.title': 'What our users say',
+    'testimonials.description': 'See what our customers have to say about us.',
     // Languages
     'lang.english': 'English',
     'lang.indonesian': 'Bahasa Indonesia',
@@ -72,6 +89,23 @@ const translations: Record<Locale, Record<string, string>> = {
     'home.description': 'Tulis ide, pilih kategori, website langsung online. Biarkan AI yang bekerja untukmu.',
     // AI Prompt
     'home.aiPromptPlaceholder': 'Ketik jawaban instan & personal?',
+    // Timeline
+    'timeline.title': 'Inovasi Otomatisasi Web',
+    'timeline.desc1': 'Mengubah percakapan sederhana menjadi identitas digital.',
+    'timeline.desc2_part1': 'Kami berdedikasi membantu UMKM Indonesia memiliki tampilan profesional secara instan lewat kekuatan',
+    // About
+    'about.whoWeAre.title': 'Siapa Kami',
+    'about.whoWeAre.desc1': 'Kami adalah tim inovator yang percaya bahwa masa depan pengembangan web adalah otomatisasi.',
+    'about.whoWeAre.desc2': 'Efferd bukan sekadar tools, tapi asisten cerdas bagi bisnis Anda.',
+    'about.whatWeDo.title': 'Apa yang kami Lakukan',
+    'about.whatWeDo.desc1': 'Kami mengubah ide abstrak menjadi website fungsional dalam hitungan detik, tanpa baris kode yang rumit.',
+    'about.whatWeDo.desc2': 'Cukup ketik visi Anda, dan AI kami akan menerjemahkannya menjadi layout, konten, dan desain yang memukau.',
+    'about.vision.title': 'Visi Kami',
+    'about.vision.desc': 'Menjadi jembatan digital tercepat bagi UMKM untuk menjangkau pasar global.',
+    // Testimonials
+    'testimonials.label': 'Testimonial',
+    'testimonials.title': 'Apa kata pengguna kami',
+    'testimonials.description': 'Lihat apa yang dikatakan pelanggan tentang kami.',
     // Languages
     'lang.english': 'English',
     'lang.indonesian': 'Bahasa Indonesia',

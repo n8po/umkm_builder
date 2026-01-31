@@ -37,14 +37,14 @@ export const productLinks: LinkItemType[] = [
 export const companyLinks: LinkItemType[] = [
 	{
 		labelKey: "aboutUs",
-		href: "#",
+		href: "/about",
 		descriptionKey: "aboutUs",
 		icon: Users,
 		type: "company",
 	},
 	{
 		labelKey: "customerStories",
-		href: "#",
+		href: "/testimonals",
 		descriptionKey: "customerStories",
 		icon: Star,
 		type: "company",

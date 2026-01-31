@@ -62,7 +62,7 @@ export function MobileNav() {
 				createPortal(
 					<div
 						className={cn(
-							"bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/50",
+							"bg-white dark:bg-zinc-950",
 							"fixed top-14 right-0 bottom-0 left-0 z-40 flex flex-col overflow-hidden border-t md:hidden"
 						)}
 						id="mobile-menu"
