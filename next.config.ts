@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'www.shadcnblocks.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.thiings.co',
+      },
     ],
   },
 };

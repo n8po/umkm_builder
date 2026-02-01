@@ -5,7 +5,6 @@ import {
 	LayersIcon,
 	RotateCcw,
 	Shield,
-	Star,
 	Users,
 } from "lucide-react";
 import type { LinkItemType } from "@/components/shared";
@@ -40,13 +39,6 @@ export const companyLinks: LinkItemType[] = [
 		href: "/about",
 		descriptionKey: "aboutUs",
 		icon: Users,
-		type: "company",
-	},
-	{
-		labelKey: "customerStories",
-		href: "/testimonals",
-		descriptionKey: "customerStories",
-		icon: Star,
 		type: "company",
 	}
 ];

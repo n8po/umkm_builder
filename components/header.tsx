@@ -25,8 +25,8 @@ export function Header() {
 				}
 			)}
 		>
-			<nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-				<div className="flex items-center gap-5">
+			<nav className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
+				<div className="flex items-center gap-8">
 					<Link 
 						className="rounded-md px-3 py-2.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" 
 						href="/"
@@ -35,7 +35,7 @@ export function Header() {
 					</Link>
 					<DesktopNav />
 				</div>
-				<div className="hidden items-center gap-2 md:flex">
+				<div className="hidden items-center gap-4 md:flex">
 					<LanguageSelectorDropdown />
 					<ThemeTabs />
 					<Button 

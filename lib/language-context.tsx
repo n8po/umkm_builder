@@ -12,9 +12,10 @@ const LanguageContext = createContext<{
 const translations: Record<Locale, Record<string, string>> = {
   en: {
     // Navigation
-    'nav.product': 'Product',
-    'nav.company': 'Company',
-    'nav.pricing': 'Pricing',
+    'nav.product':   'Product',
+    'nav.company':   'Company',
+    'nav.pricing':   'Pricing',
+    'nav.ecosystem': 'Ecosystem',
     // Buttons
     'buttons.signIn': 'Sign In',
     'buttons.getStarted': 'Get Started',
@@ -69,6 +70,7 @@ const translations: Record<Locale, Record<string, string>> = {
     'nav.product': 'Produk',
     'nav.company': 'Perusahaan',
     'nav.pricing': 'Harga',
+    'nav.ecosystem': 'Ekosistem',
     // Buttons
     'buttons.signIn': 'Masuk',
     'buttons.getStarted': 'Mulai Sekarang',

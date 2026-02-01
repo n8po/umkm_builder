@@ -89,6 +89,10 @@ export function MobileNav() {
 								{companyLinks.map((link) => (
 									<LinkItem key={`company-${link.labelKey}`} {...link} />
 								))}
+								<span className="text-sm">{t('nav.ecosystem')}</span>
+								{companyLinks.map((link) => (
+									<LinkItem key={`ecosystem-${link.labelKey}`} {...link} />
+								))}
 								{companyLinks2.map((link) => (
 									<a
 										key={`company2-${link.labelKey}`}

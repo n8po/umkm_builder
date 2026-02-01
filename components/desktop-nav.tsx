@@ -29,7 +29,7 @@ export function DesktopNav() {
 
 	return (
 		<NavigationMenu className="hidden md:flex">
-			<NavigationMenuList>
+			<NavigationMenuList className="gap-6">
 				<NavigationMenuItem>
 					<NavigationMenuTrigger className="bg-transparent">
 						{t('nav.product')}
@@ -83,6 +83,11 @@ export function DesktopNav() {
 				<NavigationMenuLink asChild className="px-4">
 					<a className="rounded-md p-2 transition-colors hover:bg-blue-50 dark:hover:bg-zinc-800" href="#">
 						{t('nav.pricing')}
+					</a>
+				</NavigationMenuLink>
+								<NavigationMenuLink asChild className="px-4">
+					<a className="rounded-md p-2 transition-colors hover:bg-blue-50 dark:hover:bg-zinc-800" href="#">
+						{t('nav.ecosystem')}
 					</a>
 				</NavigationMenuLink>
 			</NavigationMenuList>
