@@ -12,7 +12,7 @@ import type { LinkItemType } from "@/components/shared";
 export const productLinks: LinkItemType[] = [
 	{
 		labelKey: "websiteBuilder",
-		href: "#",
+		href: "/chat",
 		descriptionKey: "websiteBuilder",
 		icon: GlobeIcon,
 		type: "product",
