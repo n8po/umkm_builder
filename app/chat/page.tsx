@@ -1,5 +1,4 @@
 import { SidebarChat } from "@/components/sidebar-chat"
-import { Chat } from "@/components/chat"
 import { Header } from "@/components/header_chat"
 
 export default function ChatPage() {
@@ -8,7 +7,6 @@ export default function ChatPage() {
       <SidebarChat />
       <div className="flex-1 flex flex-col min-w-0">
         <Header />
-        <Chat />
       </div>
     </div>
   )
