@@ -1,0 +1,97 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { motion, type Variants } from "framer-motion";
+import { LayoutGrid } from "lucide-react";
+import { Logo } from "@/components/logo";
+import Link from "next/link";
+
+export function HeroSection() {
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.12,
+        delayChildren: 0.08,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.45, ease: "easeOut" },
+    },
+  };
+
+  return (
+    <section className="relative min-h-[560px] w-full overflow-hidden bg-white">
+      {/* Subtle gradient burst (blue-purple → red-purple) */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-100"
+        aria-hidden
+        style={{
+          background:
+            "radial-gradient(ellipse 90% 70% at 30% 20%, rgba(129,140,248,0.06) 0%, transparent 50%), radial-gradient(ellipse 80% 60% at 70% 80%, rgba(244,114,182,0.05) 0%, transparent 50%)",
+        }}
+      />
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative flex min-h-[560px] flex-col items-center justify-center px-4 py-20 text-center"
+      >
+        {/* Logo / Brand - top center */}
+        <motion.div variants={itemVariants} className="mb-10">
+          <Link href="/" className="inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 rounded">
+            <Logo className="h-5 text-neutral-900" />
+          </Link>
+        </motion.div>
+
+        {/* Headline - two lines, dark */}
+        <motion.h1
+          variants={itemVariants}
+          className="mb-6 max-w-3xl text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl lg:text-6xl"
+        >
+            From idea to online website in minutes.
+        </motion.h1>
+
+        {/* Optional subtext - minimal */}
+        <motion.p
+          variants={itemVariants}
+          className="mb-10 max-w-xl text-base text-neutral-600 md:text-lg"
+        >
+          Build a professional UMKM website with AI. No coding, no hassle.
+        </motion.p>
+
+        {/* CTAs - primary black + outline */}
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-wrap items-center justify-center gap-3"
+        >
+          <Button
+            size="lg"
+            className="gap-2 rounded-md bg-neutral-900 px-6 text-white hover:bg-neutral-800"
+            asChild
+          >
+            <Link href="#download">
+              <LayoutGrid className="h-4 w-4" aria-hidden />
+              Download for Windows
+            </Link>
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="rounded-md border-neutral-800 bg-white text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900"
+            asChild
+          >
+            <Link href="#use-cases">Explore use cases</Link>
+          </Button>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}

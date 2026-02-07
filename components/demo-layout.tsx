@@ -49,22 +49,7 @@ export function DemoLayout() {
             </div>
           </div>
 
-          {/* Right Column - Preview Visual + AI Input */}
           <div className="flex flex-col space-y-6">
-            {/* Preview Visual */}
-            <div className="relative aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-2xl border bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 shadow-2xl">
-              {/* GIF Display */}
-              <Image 
-                src="/assets/gif/explainer_ai.gif" 
-                alt="AI Website Builder Demo"
-                width={800}
-                height={600}
-                priority
-                unoptimized
-                className="h-full w-full object-cover"
-              />
-            </div>
-
             {/* AI Prompt Input */}
             <div className="w-full max-w-2xl">
               <div className="flex items-center gap-2 rounded-full border bg-background p-2 shadow-lg">
