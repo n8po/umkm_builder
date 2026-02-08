@@ -1,12 +1,19 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import {
+  RippleButton,
+  RippleButtonRipples,
+} from '@/components/animate-ui/components/buttons/ripple';
+import { NativeStartNow } from "@/components/uitripled/native-start-now-shadcnui";
 import { motion, type Variants } from "framer-motion";
-import { LayoutGrid } from "lucide-react";
+import { Rocket } from "lucide-react";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function HeroSection() {
+  const router = useRouter();
+  
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -42,7 +49,7 @@ export function HeroSection() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative flex min-h-[560px] flex-col items-center justify-center px-4 py-20 text-center"
+        className="relative flex min-h-screen flex-col items-center justify-center px-4 py-20 text-center"
       >
         {/* Logo / Brand - top center */}
         <motion.div variants={itemVariants} className="mb-10">
@@ -54,7 +61,7 @@ export function HeroSection() {
         {/* Headline - two lines, dark */}
         <motion.h1
           variants={itemVariants}
-          className="mb-6 max-w-3xl text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl lg:text-6xl"
+          className="mb-6 max-w-3xl text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading"
         >
             From idea to online website in minutes.
         </motion.h1>
@@ -64,7 +71,7 @@ export function HeroSection() {
           variants={itemVariants}
           className="mb-10 max-w-xl text-base text-neutral-600 md:text-lg"
         >
-          Build a professional UMKM website with AI. No coding, no hassle.
+          Build a professional MSME website with AI. No coding, no hassle.
         </motion.p>
 
         {/* CTAs - primary black + outline */}
@@ -72,24 +79,28 @@ export function HeroSection() {
           variants={itemVariants}
           className="flex flex-wrap items-center justify-center gap-3"
         >
-          <Button
+          <NativeStartNow
+            label="Get Started"
             size="lg"
-            className="gap-2 rounded-md bg-neutral-900 px-6 text-white hover:bg-neutral-800"
-            asChild
-          >
-            <Link href="#download">
-              <LayoutGrid className="h-4 w-4" aria-hidden />
-              Download for Windows
-            </Link>
-          </Button>
-          <Button
+            variant="solid"
+            showShimmer={false}
+            showRocket={false}
+            onStart={async () => {
+              router.push("#chat");
+            }}
+            className="gap-2 rounded-md bg-neutral-900 text-white hover:bg-neutral-800"
+            icon={<Rocket className="h-4 w-4" aria-hidden />}
+          />
+          <RippleButton
             size="lg"
             variant="outline"
-            className="rounded-md border-neutral-800 bg-white text-neutral-900 hover:bg-neutral-50 hover:text-neutral-900"
+            className="h-14 px-8 rounded-lg border border-neutral-200 bg-white text-neutral-900 shadow-sm hover:bg-neutral-50 hover:border-neutral-300"
             asChild
           >
-            <Link href="#use-cases">Explore use cases</Link>
-          </Button>
+            <Link href="#use-cases">Explore use cases
+            <RippleButtonRipples />
+            </Link>
+          </RippleButton>
         </motion.div>
       </motion.div>
     </section>

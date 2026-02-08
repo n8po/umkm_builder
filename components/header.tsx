@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { HomeIcon } from "@/components/ui/home";
 import {
   RippleButton,
   RippleButtonRipples,
@@ -208,8 +207,7 @@ export function Header() {
                 size="sm"
                 className="gap-2 rounded-md bg-blue-600 px-4 text-white hover:bg-blue-700"
               >
-                <HomeIcon size={16} aria-hidden />
-                Register
+                Get Loka Free
                 <RippleButtonRipples />
               </RippleButton>
             </Link>
