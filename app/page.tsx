@@ -3,9 +3,9 @@ import { HeroSection } from "@/components/hero-section";
 import { Footer } from "@/components/footer";
 import {
   ProductFeaturesSection,
-  BuiltForDevelopersSection,
+  BusinessSection,
   FinalCtaSection,
-} from "@/components/landing-antigravity-sections";
+} from "@/components/landing-feature-sections";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
       <main>
         <HeroSection />
         <ProductFeaturesSection />
-        <BuiltForDevelopersSection />
+        <BusinessSection />
         <FinalCtaSection />
       </main>
       <Footer />

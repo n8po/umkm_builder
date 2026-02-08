@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { LayoutGrid } from "lucide-react";
+import {
+  RippleButton,
+  RippleButtonRipples,
+} from '@/components/animate-ui/components/buttons/ripple';
+import { Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 
 const productFeatures = [
@@ -99,7 +102,7 @@ export function ProductFeaturesSection() {
   );
 }
 
-export function BuiltForDevelopersSection() {
+export function BusinessSection() {
   return (
     <section id="use-cases" className="relative w-full bg-neutral-50 py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-4">
@@ -114,7 +117,7 @@ export function BuiltForDevelopersSection() {
             Built for developers
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
-            Whether you're a professional in a large codebase, a hobbyist vibe-coding in your spare time, or anyone in between.
+            Whether you&apos;re a professional in a large codebase, a hobbyist vibe-coding in your spare time, or anyone in between.
           </p>
         </motion.div>
         <div className="grid gap-6 md:grid-cols-3">
@@ -149,7 +152,7 @@ export function BuiltForDevelopersSection() {
 
 export function FinalCtaSection() {
   return (
-    <section id="download" className="relative w-full overflow-hidden bg-white py-20 md:py-28">
+    <section id="register" className="relative w-full overflow-hidden bg-white py-20 md:py-28">
       <div
         className="pointer-events-none absolute inset-0 opacity-50"
         aria-hidden
@@ -166,7 +169,7 @@ export function FinalCtaSection() {
           transition={{ duration: 0.5 }}
           className="text-2xl font-bold tracking-tight text-neutral-900 md:text-3xl"
         >
-          Available at no charge
+          LOKA
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 12 }}
@@ -175,7 +178,7 @@ export function FinalCtaSection() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-2 text-lg text-neutral-600"
         >
-          For developers. Achieve new heights.
+          For Your Brand. Manage Your Profits. Smarter.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -184,16 +187,17 @@ export function FinalCtaSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-8"
         >
-          <Button
+          <RippleButton
             size="lg"
             className="gap-2 rounded-md bg-neutral-900 px-6 text-white hover:bg-neutral-800"
             asChild
           >
-            <Link href="#download">
-              <LayoutGrid className="h-4 w-4" aria-hidden />
-              Download
+            <Link href="#register">
+              <Rocket className="h-4 w-4" aria-hidden />
+              Get Started
+              <RippleButtonRipples/>
             </Link>
-          </Button>
+          </RippleButton>
         </motion.div>
       </div>
     </section>
