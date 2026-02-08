@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
-import { ChevronDown, ChevronUp, Download, XIcon } from "lucide-react";
+import { HomeIcon } from "@/components/ui/home";
+import {
+  RippleButton,
+  RippleButtonRipples,
+} from '@/components/animate-ui/components/buttons/ripple';
+import { ChevronDown, ChevronUp, XIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import type { LucideIcon } from "lucide-react";
@@ -25,7 +28,6 @@ export function MobileNav({
   open,
   onClose,
   useCasesItems,
-  brandName = "Google Antigravity",
 }: MobileNavProps) {
   const [useCasesExpanded, setUseCasesExpanded] = useState(false);
 
@@ -47,19 +49,27 @@ export function MobileNav({
       className="fixed inset-0 z-40 flex flex-col bg-white md:hidden"
       id="mobile-menu"
     >
-      {/* Mobile menu header: logo left, close button right */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 px-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2"
-          onClick={onClose}
-        >
-          <Logo className="h-5 text-neutral-800" />
-          <span className="text-sm font-medium text-neutral-800">
-            {brandName}
-          </span>
-        </Link>
-        <Button
+       <Link href="#sign-in" className="hidden md:inline-flex">
+              <RippleButton
+                size="sm"
+                className="gap-2 rounded-md bg-neutral-800 px-4 text-white hover:bg-neutral-700"
+              >
+                Sign In
+                <RippleButtonRipples />
+              </RippleButton>
+            </Link>
+        <Link href="#register" className="hidden md:inline-flex">
+              <RippleButton
+                size="sm"
+                className="gap-2 rounded-md bg-blue-600 px-4 text-white hover:bg-blue-700"
+              >
+                <HomeIcon size={16} aria-hidden />
+                Register
+                <RippleButtonRipples />
+              </RippleButton>
+            </Link>    
+        <RippleButton
           type="button"
           aria-label="Close menu"
           size="icon"
@@ -67,7 +77,7 @@ export function MobileNav({
           onClick={onClose}
         >
           <XIcon className="h-5 w-5" />
-        </Button>
+        </RippleButton>
       </div>
 
       <div className="flex flex-1 flex-col overflow-auto p-4">
@@ -126,23 +136,31 @@ export function MobileNav({
         </Link>
 
         <Link
-          href="#blog"
+          href="#About"
           className="rounded-md px-3 py-3.5 text-base font-medium text-neutral-800 hover:bg-neutral-50"
           onClick={onClose}
         >
-          Blog
+          About
         </Link>
 
-        <div className="mt-6 border-t border-neutral-200 pt-4">
-          <Button
+        <div className="mt-6 border-t border-neutral-200 pt-4 flex flex-col gap-3">
+          <RippleButton
             className="w-full gap-2 rounded-md bg-neutral-800 text-white hover:bg-neutral-700"
             asChild
           >
-            <Link href="#download" onClick={onClose}>
-              <Download className="h-4 w-4" />
-              Download for Windows
+            <Link href="#sign-in" onClick={onClose}>
+              Sign In
             </Link>
-          </Button>
+          </RippleButton>
+          <RippleButton 
+            className="w-full gap-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            asChild
+          >
+            <Link href="#register" onClick={onClose}>
+              <HomeIcon size={16} aria-hidden />
+              Register
+            </Link>
+          </RippleButton>
         </div>
       </div>
     </div>,
