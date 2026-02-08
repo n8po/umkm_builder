@@ -1,11 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import {
-  RippleButton,
-  RippleButtonRipples,
-} from '@/components/animate-ui/components/buttons/ripple';
-import { Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 
@@ -200,17 +195,6 @@ export function FinalCtaSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-8"
         >
-          <RippleButton
-            size="lg"
-            className="gap-2 rounded-md bg-neutral-900 px-6 text-white hover:bg-neutral-800"
-            asChild
-          >
-            <Link href="#register">
-              <Rocket className="h-4 w-4" aria-hidden />
-              Get Started
-              <RippleButtonRipples/>
-            </Link>
-          </RippleButton>
         </motion.div>
       </div>
     </section>

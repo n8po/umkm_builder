@@ -2,15 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import {
-  RippleButton,
-  RippleButtonRipples,
-} from '@/components/animate-ui/components/buttons/ripple';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
-import { Rocket, X } from "lucide-react";
 import { NativeFollowCursorArea } from "@/components/uitripled/native-follow-cursor";
 import { Scrollspy } from "@/components/ui/scrollspy";
 import { useRef, useState, useEffect } from "react";
+import { X } from "lucide-react";
 
 const productFeatures = [
   {
@@ -326,17 +322,6 @@ export function FinalCtaSection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-8"
         >
-          <RippleButton
-            size="lg"
-            className="gap-2 rounded-md bg-orange-500 px-6 text-white font-bold hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700"
-            asChild
-          >
-            <Link href="#download">
-              <Rocket className="h-4 w-4" aria-hidden />
-                Get Started
-                <RippleButtonRipples/>
-            </Link>
-          </RippleButton>
         </motion.div>
       </div>
     </section>

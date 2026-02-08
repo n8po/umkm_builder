@@ -11,13 +11,11 @@ interface TimelineEntry {
   content: React.ReactNode;
 }
 
-import { useLanguage } from "@/lib/language-context";
 
 export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
   const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
-  const { t } = useLanguage();
 
   useEffect(() => {
     if (ref.current) {
@@ -41,13 +39,10 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
     >
       <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
         <h2 className="text-lg md:text-4xl mb-4 text-black dark:text-white max-w-4xl">
-          {t('timeline.title')}
+          Empowering Local Businesses to Go National
         </h2>
         <p className="text-neutral-700 dark:text-neutral-300 text-md md:text-base max-w-3xl">
-          {t('timeline.desc1')}
-        </p>
-        <p className="text-neutral-700 dark:text-neutral-300 text-md md:text-base max-w-3xl">
-          {t('timeline.desc2_part1')} <span className="italic">Artificial Intelligence</span>.
+          We are dedicated to transforming the landscape for MSMEs, ensuring transparency and accessibility. Our mission is to boost the local economy by providing the tools for businesses to scale nationwide.
         </p>
       </div>
 

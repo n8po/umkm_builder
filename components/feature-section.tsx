@@ -6,24 +6,6 @@ import { useOutsideClick } from "../hooks/use-outside-click";
 import { Map, MapControls, useMap } from "@/components/ui/map";
 import { Button } from "@/components/ui/button";
 import { RotateCcw, Mountain, X } from "lucide-react";
-import { FeatureCard, type Feature } from "@/components/feature-grid";
-
-const platformFeatures: Feature[] = [
-  {
-    imageSrc: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-ClJGywf6Sr8VdX0bDPLlNQrG8BSTFV.png&w=500&q=75",
-    imageAlt: "Easel Flipchart icon",
-    title: "Budget Management",
-    description: "Calculate your business's conventional and contemporary costs, made easier with the help of AI to provide the best advice.",
-    href: "#",
-  },
-  {
-    imageSrc: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-b4opFtjTkc0AjPR6H9fuB42Qm0lnE4.png&w=500&q=75",
-    imageAlt: "Retro Web Browser Interface icon",
-    title: "Deploy your Website",
-    description: "Fast and secure automated hosting. Websites are instantly up and running without any technical configuration..",
-    href: "#",
-  },
-];
 
 function MapController() {
   const { map, isLoaded } = useMap();
@@ -107,31 +89,15 @@ export function FeatureSection() {
   useOutsideClick(ref, () => setActive(false));
 
   return (
-    <section className="py-20 px-4 w-full">
+    <section className="py-12 px-4 w-full">
       <div className="max-w-7xl mx-auto">
-       <div className="mt-24 w-full max-w-6xl mx-auto">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl">
-              One platform gives you the control
-            </h2>
-            <p className="mt-4 max-w-3xl mx-auto text-lg text-neutral-600 dark:text-neutral-400">
-              From design planning and content writing to website launch, manage all your business&apos;s digital assets in one flexible and intelligent location.
-            </p>
-          </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto h-[500px]">
-           <FeatureCard 
-              feature={platformFeatures[0]} 
-              className="row-span-1 md:row-span-2 rounded-3xl"
-           />
-           <FeatureCard
-              feature={platformFeatures[1]}
-              className="row-span-1 md:col-span-2 rounded-3xl"
-           />
+       <div className="w-full">
+        <div className="w-full h-[500px]">
           {/* Expandable Map Card */}
           <motion.div
             layoutId={`card-${id}`}
             onClick={() => setActive(true)}
-            className="col-span-1 md:col-span-2 relative cursor-pointer overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 h-full min-h-[200px]"
+            className="w-full relative cursor-pointer overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 h-full"
           >
              {/* Preview Content (Small Map) */}
              <div className="absolute inset-0 pointer-events-none">

@@ -24,7 +24,7 @@ const useCasesItems = [
     href: "#use-cases/cost-analysis", 
     icon: ChartLine },
   { label: "Business Discovery",
-    href: "#use-cases/business-discovery", 
+    href: "/map", 
     icon: MapPinCheck },
 ];
 
@@ -185,7 +185,7 @@ export function Header() {
               Pricing
             </Link>
             <Link
-              href="#blog"
+              href="/about"
               className="rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-[#e8eaed] hover:text-neutral-900"
             >
               About 
