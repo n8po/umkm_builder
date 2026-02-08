@@ -36,7 +36,6 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-[560px] w-full overflow-hidden bg-white">
-      {/* Subtle gradient burst (blue-purple → red-purple) */}
       <div
         className="pointer-events-none absolute inset-0 opacity-100"
         aria-hidden

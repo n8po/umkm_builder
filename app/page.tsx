@@ -6,6 +6,7 @@ import {
   BusinessSection,
   FinalCtaSection,
 } from "@/components/landing-feature-sections";
+import { ProductDemoSection } from "@/components/landing-sections";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
+        <ProductDemoSection />
         <ProductFeaturesSection />
         <BusinessSection />
         <FinalCtaSection />

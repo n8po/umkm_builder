@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   RippleButton,
   RippleButtonRipples,
 } from '@/components/animate-ui/components/buttons/ripple';
-import { motion } from "framer-motion";
-import { Rocket } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Rocket, X } from "lucide-react";
+import { NativeFollowCursorArea } from "@/components/uitripled/native-follow-cursor";
+import { useRef, useState, useEffect } from "react";
 
 const productFeatures = [
   {
@@ -52,6 +55,130 @@ const useCases = [
     label: "View case",
   },
 ];
+
+export function ProductDemoSection() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const sectionRef = useRef<HTMLDivElement>(null);
+  
+  // Scroll animation - video MAXIMIZES on scroll down
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  
+  // Video scale: starts at 1.0, grows to 1.35 (maximize)
+  const scale = useTransform(scrollYProgress, [0, 0.3, 0.5], [1, 1.25, 1.35]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.5], [0.6, 0.9, 1]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Restore body scroll
+    document.body.style.overflow = 'unset';
+  };
+
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCloseModal();
+    };
+    
+    if (isModalOpen) {
+      window.addEventListener('keydown', handleEscape);
+      return () => window.removeEventListener('keydown', handleEscape);
+    }
+  }, [isModalOpen]);
+
+  return (
+    <>
+      <section ref={sectionRef} id="demo" className="relative w-full overflow-hidden bg-background py-20 md:py-32 min-h-screen">
+        <div className="mx-auto px-4 md:px-8 lg:px-12 h-full flex flex-col items-center justify-center">          
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{
+              scale: scale,
+              opacity: opacity,
+            }}
+            className="w-full max-w-6xl"
+          >
+            {/* GIF Preview - Click to open modal */}
+            <NativeFollowCursorArea
+              cursorContent={<><span className="text-black">▶</span> Play intro</>}
+              size="md"
+              variant="solid-white"
+              showDot={false}
+              className="w-full overflow-hidden rounded-3xl shadow-2xl cursor-none ring-1 ring-white/20"
+            >
+              <div 
+                className="aspect-video w-full relative group cursor-none"
+                onClick={handleOpenModal}
+              >
+                {/* GIF Preview */}
+                <Image
+                  src="/assets/gif/explainer_ai.gif"
+                  alt="AI Demo Preview"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            </NativeFollowCursorArea>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Video Modal - Fullscreen Lightbox */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          >
+            {/* Close Button */}
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 z-[110] p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Video Container */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="relative w-full max-w-6xl mx-4 aspect-video rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* YouTube Embed or Video Player */}
+              <iframe
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1"
+                title="Product Demo Video"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
 
 export function ProductFeaturesSection() {
   return (

@@ -20,6 +20,7 @@
   },
   "registries": {
     "@uitripled": "https://ui.tripled.work/r/{name}.json",
-    "@animate-ui": "https://animate-ui.com/r/{name}.json"
+    "@animate-ui": "https://animate-ui.com/r/{name}.json",
+    "@limeplay": "https://limeplay.winoffrg.dev/r/{name}.json"
   }
 }
