@@ -7,97 +7,110 @@ import {
 } from '@/components/animate-ui/components/buttons/ripple';
 import { Rocket } from "lucide-react";
 import { motion } from "framer-motion";
+import { useRef } from "react";
+
+import { Scrollspy } from "@/components/ui/scrollspy";
 
 const productFeatures = [
   {
-    title: "An AI IDE Core",
+    title: "AI-Powered Website Builder",
     description:
-      "The editor offers tab autocompletion, natural language code commands, and a configurable, context-aware agent.",
+      "Create a professional website for your business in minutes. Simply answer a few questions, and our AI will design the layout, content, and structure perfectly tailored to your brand.",
   },
   {
-    title: "Higher-level Abstractions",
+    title: "Cost & Break-Even Calculator",
     description:
-      "A more intuitive task-based approach to monitoring agent activity, with essential artifacts and verification results to build trust.",
+      "Make business financial analysis effortless. Automatically calculate Cost of Goods Sold and Break-Even Point to determine optimal pricing and minimum sales targets.",
   },
   {
-    title: "Cross-surface Agents",
+    title: "Location Discovery Map",
     description:
-      "Synchronized agentic control across your editor, terminal, and browser for powerful development workflows.",
+      "Integrated business location mapping. Help customers find your business easily and boost local visibility with location-based search features.",
   },
   {
-    title: "User Feedback",
+    title: "One-Click Deploy & Publish",
     description:
-      "Intuitively integrate feedback across surfaces and artifacts to guide and refine the agent's work.",
-  },
-  {
-    title: "An Agent-First Experience",
-    description:
-      "Manage multiple agents at the same time, across any workspace, from one central mission control view.",
+      "Publish your website with a single click. Get a free subdomain (yourbusiness.loka.id) or connect your own custom domain. Your site goes live instantly and is ready for visitors.",
   },
 ];
 
 const useCases = [
   {
-    title: "Frontend developer",
+    title: "Food & Beverage",
     description:
-      "Streamline UX development by leveraging browser-in-the-loop agents to automate repetitive tasks.",
-    href: "#use-cases/frontend",
-    label: "View case",
+      "Restaurants, cafés, or catering services can create online menus, accept orders, and showcase their location with beautiful maps.",
+    href: "#use-cases/food",
+    label: "See example",
   },
   {
-    title: "Full stack developer",
+    title: "Fashion & Retail",
     description:
-      "Build production-ready applications with confidence with thoroughly designed artifacts and comprehensive verification tests.",
-    href: "#use-cases/fullstack",
-    label: "View case",
+      "Clothing stores, accessories, or handmade crafts can display products in stunning galleries and connect to their marketplaces.",
+    href: "#use-cases/retail",
+    label: "See example",
   },
   {
-    title: "Enterprise developer",
+    title: "Services & Freelance",
     description:
-      "Streamline operations and reduce context switching by orchestrating agents across workspaces using the Agent Manager.",
-    href: "#use-cases/enterprise",
-    label: "View case",
+      "Photographers, designers, or consultants can showcase portfolios and receive client bookings directly from their website.",
+    href: "#use-cases/services",
+    label: "See example",
   },
 ];
 
 export function ProductFeaturesSection() {
+  const documentRef = useRef<Document>(typeof document !== 'undefined' ? document : null);
+  
   return (
-    <section id="product" className="relative w-full overflow-hidden bg-white py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4">
-        <motion.div
+    <section id="product" className="relative w-full overflow-hidden bg-white py-20 md:py-32">
+      {/* Header */}
+      <div className="mx-auto max-w-6xl px-4 mb-20">
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-14 text-center"
+          className="text-3xl md:text-4xl font-bold text-neutral-900 max-w-2xl"
         >
-          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 md:text-4xl">
-            Built for the agent-first era
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
-            Evolve the IDE into an agentic development platform with trust and control at the center.
-          </p>
-        </motion.div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          Build your professional website with AI-powered tools designed for small businesses.
+        </motion.h2>
+      </div>
+
+      {/* Scrollspy Content */}
+      <Scrollspy className="mx-auto max-w-6xl px-4" offset={200} targetRef={documentRef} history={false}>
+        <div className="space-y-32 md:space-y-48">
           {productFeatures.map((item, i) => (
-            <motion.article
+            <motion.div
               key={item.title}
-              initial={{ opacity: 0, y: 16 }}
+              id={`feature-${i}`}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="grid md:grid-cols-2 gap-8 md:gap-16 items-center"
             >
-              <h3 className="text-lg font-semibold text-neutral-900">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
-                {item.description}
-              </p>
-            </motion.article>
+              {/* Text Content - Left */}
+              <div className="order-2 md:order-1">
+                <h3 className="text-xl md:text-2xl font-bold text-neutral-900 mb-4">
+                  {item.title}
+                </h3>
+                <p className="text-base text-neutral-600 leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
+              
+              {/* Image/Demo - Right */}
+              <div className="order-1 md:order-2">
+                <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-blue-50 via-white to-yellow-50 border border-neutral-200 shadow-lg overflow-hidden flex items-center justify-center">
+                  <div className="w-[90%] h-[85%] rounded-xl bg-white shadow-md border border-neutral-100 flex items-center justify-center">
+                    <span className="text-neutral-400 text-sm">Feature Demo {i + 1}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </Scrollspy>
     </section>
   );
 }
@@ -114,10 +127,10 @@ export function BusinessSection() {
           className="mb-14 text-center"
         >
           <h2 className="text-3xl font-bold tracking-tight text-neutral-900 md:text-4xl">
-            Built for developers
+            Built for Every Small Business
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
-            Whether you&apos;re a professional in a large codebase, a hobbyist vibe-coding in your spare time, or anyone in between.
+            Whether you run a local coffee shop, an online boutique, or a freelance service — we help you create a professional web presence without technical skills.
           </p>
         </motion.div>
         <div className="grid gap-6 md:grid-cols-3">

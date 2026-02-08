@@ -6,9 +6,10 @@ import {
   RippleButton,
   RippleButtonRipples,
 } from '@/components/animate-ui/components/buttons/ripple';
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { Rocket, X } from "lucide-react";
 import { NativeFollowCursorArea } from "@/components/uitripled/native-follow-cursor";
+import { Scrollspy } from "@/components/ui/scrollspy";
 import { useRef, useState, useEffect } from "react";
 
 const productFeatures = [
@@ -68,8 +69,13 @@ export function ProductDemoSection() {
   });
   
   // Video scale: starts at 1.0, grows to 1.35 (maximize)
-  const scale = useTransform(scrollYProgress, [0, 0.3, 0.5], [1, 1.25, 1.35]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.5], [0.6, 0.9, 1]);
+  const scaleRaw = useTransform(scrollYProgress, [0, 0.3, 0.5], [1, 1.15, 1.25]);
+  const opacityRaw = useTransform(scrollYProgress, [0, 0.2, 0.5], [0.7, 0.9, 1]);
+  
+  // Smooth spring physics for buttery animations
+  const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
+  const scale = useSpring(scaleRaw, springConfig);
+  const opacity = useSpring(opacityRaw, springConfig);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -182,42 +188,54 @@ export function ProductDemoSection() {
 
 export function ProductFeaturesSection() {
   return (
-    <section id="product" className="relative w-full overflow-hidden bg-background py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-          className="mb-14 text-center"
-        >
-          <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Built for the agent-first era
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Evolve the IDE into an agentic development platform with trust and control at the center.
-          </p>
-        </motion.div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {productFeatures.map((item, i) => (
-            <motion.article
-              key={item.title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <h3 className="text-lg font-semibold text-foreground">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                {item.description}
-              </p>
-            </motion.article>
-          ))}
+    <section id="product" className="relative w-full overflow-hidden bg-black py-20 md:py-28 min-h-screen">
+      <Scrollspy className="mx-auto max-w-7xl px-4" offset={100}>
+        <div className="flex gap-8 lg:gap-16">
+          {/* Sticky Sidebar Navigation */}
+          <nav className="hidden md:block w-64 shrink-0">
+            <div className="sticky top-24 space-y-2">
+              {productFeatures.map((item, i) => (
+                <button
+                  key={item.title}
+                  data-scrollspy-anchor={`feature-${i}`}
+                  className="w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+                    text-gray-400 hover:text-white hover:bg-white/5
+                    data-[active=true]:text-primary data-[active=true]:bg-white/10"
+                >
+                  {item.title}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          {/* Content Sections */}
+          <div className="flex-1 space-y-32">
+            {productFeatures.map((item, i) => (
+              <motion.section
+                key={item.title}
+                id={`feature-${i}`}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="min-h-[60vh] flex flex-col justify-center"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                  {item.title}
+                </h3>
+                <p className="text-lg text-gray-400 max-w-2xl mb-8">
+                  {item.description}
+                </p>
+                
+                {/* Placeholder for feature visual/demo */}
+                <div className="aspect-video max-w-3xl rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center">
+                  <span className="text-gray-600 text-sm">Feature Demo {i + 1}</span>
+                </div>
+              </motion.section>
+            ))}
+          </div>
         </div>
-      </div>
+      </Scrollspy>
     </section>
   );
 }
