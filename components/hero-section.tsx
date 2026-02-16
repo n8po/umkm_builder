@@ -39,10 +39,6 @@ export function HeroSection() {
       <div
         className="pointer-events-none absolute inset-0 opacity-100"
         aria-hidden
-        style={{
-          background:
-            "radial-gradient(ellipse 90% 70% at 30% 20%, rgba(129,140,248,0.06) 0%, transparent 50%), radial-gradient(ellipse 80% 60% at 70% 80%, rgba(244,114,182,0.05) 0%, transparent 50%)",
-        }}
       />
       <motion.div
         variants={containerVariants}
@@ -96,7 +92,7 @@ export function HeroSection() {
             className="h-14 px-8 rounded-lg border border-neutral-200 bg-white text-neutral-900 shadow-sm hover:bg-neutral-50 hover:border-neutral-300"
             asChild
           >
-            <Link href="#use-cases">Explore use cases
+            <Link href="#use-cases">See how it works
             <RippleButtonRipples />
             </Link>
           </RippleButton>

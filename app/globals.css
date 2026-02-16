@@ -111,7 +111,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.985 0.01 250);
+  --background: oklch(100% 0.00011 271.152);
   --foreground: oklch(0.18 0.03 250);
   --card: oklch(0.99 0.01 250);
   --card-foreground: oklch(0.18 0.03 250);
@@ -256,4 +256,144 @@
 
 @utility focus-area-y-* {
     --y: --value(number);
+}
+
+/* Premium dropdown animation classes */
+@layer components {
+  .dropdown-motion {
+    @apply transform-gpu will-change-[transform,opacity];
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+    transform-origin: top center;
+  }
+
+  .dropdown-motion[data-state="closed"] {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.97);
+    pointer-events: none;
+    transition-duration: 360ms;
+  }
+
+  .dropdown-motion[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    transition-duration: 760ms;
+  }
+
+  /* Child items – delayed & floaty */
+  .dropdown-item-motion {
+    @apply transform-gpu will-change-[transform,opacity];
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .dropdown-item-motion[data-state="closed"] {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition-duration: 220ms;
+  }
+
+  .dropdown-item-motion[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0);
+    transition-duration: 520ms;
+  }
+
+  /* Hover intent bridge */
+  .pointer-bridge::before {
+    content: "";
+    position: absolute;
+    top: -32px;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: transparent;
+  }
+
+  /* ========================================
+     Mobile Nav Animations
+     ======================================== */
+
+  /* Chevron rotation animation - 0° to 90° */
+  .mobile-nav-chevron {
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .mobile-nav-chevron-open {
+    transform: rotate(90deg);
+  }
+
+  /* Accordion panel animation using max-height */
+  .mobile-nav-panel {
+    will-change: max-height, opacity, transform;
+    transition-property: max-height, opacity, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-nav-panel-closed {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition-duration: 200ms;
+    pointer-events: none;
+  }
+
+  .mobile-nav-panel-open {
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+    transition-duration: 320ms;
+    pointer-events: auto;
+  }
+
+  /* Panel content fade with delay */
+  .mobile-nav-panel-content {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-nav-panel-open .mobile-nav-panel-content {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 80ms;
+    transition-duration: 280ms;
+  }
+
+  /* Border top fade-in */
+  .mobile-nav-panel-border {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  .mobile-nav-panel-border-visible {
+    opacity: 1;
+    transition-delay: 100ms;
+  }
+
+  /* Divider line animate opacity */
+  .mobile-nav-divider {
+    opacity: 0.5;
+    transition: opacity 200ms ease-out;
+  }
+
+  /* Tap highlight - subtle background fade (150ms) */
+  .mobile-nav-tap {
+    position: relative;
+    transition: background-color 150ms ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-tap:active {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  /* Focus states for accessibility */
+  .mobile-nav-tap:focus-visible {
+    outline: 2px solid rgba(0, 0, 0, 0.15);
+    outline-offset: -2px;
+  }
 }

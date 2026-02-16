@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { Plus, ChevronRight } from "lucide-react";
 
 import { Scrollspy } from "@/components/ui/scrollspy";
 
@@ -32,24 +33,30 @@ const productFeatures = [
 const useCases = [
   {
     title: "Food & Beverage",
+    subtitle: "Deliciously Online.",
     description:
       "Restaurants, cafés, or catering services can create online menus, accept orders, and showcase their location with beautiful maps.",
     href: "#use-cases/food",
     label: "See example",
+    color: "from-orange-100 to-orange-50",
   },
   {
     title: "Fashion & Retail",
+    subtitle: "Style Showcased.",
     description:
       "Clothing stores, accessories, or handmade crafts can display products in stunning galleries and connect to their marketplaces.",
     href: "#use-cases/retail",
     label: "See example",
+    color: "from-purple-100 to-purple-50",
   },
   {
     title: "Services & Freelance",
+    subtitle: "Portfolio Ready.",
     description:
       "Photographers, designers, or consultants can showcase portfolios and receive client bookings directly from their website.",
     href: "#use-cases/services",
     label: "See example",
+    color: "from-blue-100 to-blue-50",
   },
 ];
 
@@ -111,47 +118,106 @@ export function ProductFeaturesSection() {
 }
 
 export function BusinessSection() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   return (
-    <section id="use-cases" className="relative w-full bg-neutral-50 py-20 md:py-28">
+    <section id="use-cases" className="relative w-full bg-white py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="mb-14 text-center"
+          className="mb-14 md:text-right"
         >
-          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 md:text-4xl">
-            Built for Every Small Business
+          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 md:text-5xl">
+            Here's how you get
+            <br />
+            going.
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
-            Whether you run a local coffee shop, an online boutique, or a freelance service — we help you create a professional web presence without technical skills.
-          </p>
         </motion.div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {useCases.map((item, i) => (
-            <motion.article
-              key={item.title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <h3 className="text-lg font-semibold text-neutral-900">
-                {item.title}
-              </h3>
-              <p className="mt-2 flex-1 text-sm text-neutral-600 leading-relaxed">
-                {item.description}
-              </p>
-              <Link
-                href={item.href}
-                className="mt-4 inline-flex items-center text-sm font-medium text-neutral-900 underline-offset-4 hover:underline"
+
+        <div className="flex flex-col md:flex-row gap-4 md:h-[420px]">
+          {useCases.map((item, i) => {
+            const isHovered = hoveredIndex === i;
+            
+            return (
+              <motion.article
+                key={item.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                className={`
+                  relative flex flex-col rounded-3xl bg-gradient-to-b ${item.color} 
+                  p-6 transition-all duration-500 ease-out cursor-pointer overflow-hidden
+                  ${isHovered ? 'md:flex-[2]' : 'md:flex-1'}
+                  min-h-[280px] md:min-h-0
+                `}
               >
-                {item.label} →
-              </Link>
-            </motion.article>
-          ))}
+                {/* Title Section */}
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-neutral-900">
+                    {item.title}
+                  </h3>
+                  <p className="text-lg font-medium text-neutral-700">
+                    {item.subtitle}
+                  </p>
+                </div>
+
+                {/* Description - Only visible on hover */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    opacity: isHovered ? 1 : 0,
+                    height: isHovered ? "auto" : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <p className="text-sm text-neutral-600 leading-relaxed mb-4">
+                    {item.description}
+                  </p>
+                </motion.div>
+
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Decorative Illustration Placeholder */}
+                <div className="flex justify-center items-end mb-4 h-32">
+                  <div className="w-24 h-24 rounded-2xl bg-white/60 backdrop-blur-sm shadow-lg flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300" />
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <div className="flex justify-end">
+                  <Link
+                    href={item.href}
+                    className={`
+                      flex items-center justify-center rounded-full 
+                      border border-neutral-300 bg-white/80 backdrop-blur-sm
+                      transition-all duration-300 hover:bg-white hover:scale-105
+                      ${isHovered ? 'px-4 py-2 gap-2' : 'w-10 h-10'}
+                    `}
+                  >
+                    {isHovered ? (
+                      <>
+                        <span className="text-sm font-medium text-neutral-900">
+                          {item.label}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-neutral-700" />
+                      </>
+                    ) : (
+                      <Plus className="w-5 h-5 text-neutral-700" />
+                    )}
+                  </Link>
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
       </div>
     </section>

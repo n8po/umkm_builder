@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 
 const footerLinks = [
-  { label: "Product", href: "#product" },
-  { label: "Use cases", href: "#use-cases" },
+  { label: "Start building", href: "/chat" },
+  { label: "How it works", href: "#use-cases" },
   { label: "Privacy", href: "#privacy" },
   { label: "Terms", href: "#terms" },
 ];
@@ -32,7 +32,7 @@ export function Footer() {
         </div>
         <div className="mt-8 border-t border-neutral-200 pt-8 text-center md:text-left">
           <p className="text-xs text-neutral-500">
-            © {new Date().getFullYear()} Your Product. All rights reserved.
+            © {new Date().getFullYear()} LOKA. All rights reserved.
           </p>
         </div>
       </div>
