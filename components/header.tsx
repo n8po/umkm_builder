@@ -238,7 +238,7 @@ export function Header() {
                   />
 
                   <Link
-                    href="#pricing"
+                    href="/pricing"
                     className="rounded-md px-3 py-2 text-lg font-medium text-neutral-900 hover:text-neutral-950"
                   >
                     Pricing

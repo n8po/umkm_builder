@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         hostname: 'www.thiings.co',
       },
     ],
+    localPatterns: [
+      {
+        pathname: '/assets/img/**',
+      },
+    ],
   },
 };
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { Plus, ChevronRight } from "lucide-react";
-
+import { FeatureIllustration, FeatureType } from "@/components/example-product";
 import { Scrollspy } from "@/components/ui/scrollspy";
 
 const productFeatures = [
@@ -30,7 +30,15 @@ const productFeatures = [
   },
 ];
 
-const useCases = [
+const useCases: {
+  title: string;
+  subtitle: string;
+  description: string;
+  href: string;
+  label: string;
+  color: string;
+  type: FeatureType;
+}[] = [
   {
     title: "Food & Beverage",
     subtitle: "Deliciously Online.",
@@ -39,6 +47,7 @@ const useCases = [
     href: "#use-cases/food",
     label: "See example",
     color: "from-orange-100 to-orange-50",
+    type: "food",
   },
   {
     title: "Fashion & Retail",
@@ -48,6 +57,7 @@ const useCases = [
     href: "#use-cases/retail",
     label: "See example",
     color: "from-purple-100 to-purple-50",
+    type: "fashion",
   },
   {
     title: "Services & Freelance",
@@ -57,14 +67,20 @@ const useCases = [
     href: "#use-cases/services",
     label: "See example",
     color: "from-blue-100 to-blue-50",
+    type: "service",
   },
 ];
 
 export function ProductFeaturesSection() {
-  const documentRef = useRef<Document>(typeof document !== 'undefined' ? document : null);
-  
+  const documentRef = useRef<Document>(
+    typeof document !== "undefined" ? document : null
+  );
+
   return (
-    <section id="product" className="relative w-full overflow-hidden bg-white py-20 md:py-32">
+    <section
+      id="product"
+      className="relative w-full overflow-hidden bg-white py-20 md:py-32"
+    >
       {/* Header */}
       <div className="mx-auto max-w-6xl px-4 mb-20">
         <motion.h2
@@ -74,12 +90,18 @@ export function ProductFeaturesSection() {
           transition={{ duration: 0.5 }}
           className="text-3xl md:text-4xl font-bold text-neutral-900 max-w-2xl"
         >
-          Build your professional website with AI-powered tools designed for small businesses.
+          Build your professional website with AI-powered tools designed for
+          small businesses.
         </motion.h2>
       </div>
 
       {/* Scrollspy Content */}
-      <Scrollspy className="mx-auto max-w-6xl px-4" offset={200} targetRef={documentRef} history={false}>
+      <Scrollspy
+        className="mx-auto max-w-6xl px-4"
+        offset={200}
+        targetRef={documentRef}
+        history={false}
+      >
         <div className="space-y-32 md:space-y-48">
           {productFeatures.map((item, i) => (
             <motion.div
@@ -91,7 +113,7 @@ export function ProductFeaturesSection() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="grid md:grid-cols-2 gap-8 md:gap-16 items-center"
             >
-              {/* Text Content - Left */}
+              {/* Text Content */}
               <div className="order-2 md:order-1">
                 <h3 className="text-xl md:text-2xl font-bold text-neutral-900 mb-4">
                   {item.title}
@@ -100,12 +122,14 @@ export function ProductFeaturesSection() {
                   {item.description}
                 </p>
               </div>
-              
-              {/* Image/Demo - Right */}
+
+              {/* Demo Box */}
               <div className="order-1 md:order-2">
                 <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-blue-50 via-white to-yellow-50 border border-neutral-200 shadow-lg overflow-hidden flex items-center justify-center">
                   <div className="w-[90%] h-[85%] rounded-xl bg-white shadow-md border border-neutral-100 flex items-center justify-center">
-                    <span className="text-neutral-400 text-sm">Feature Demo {i + 1}</span>
+                    <span className="text-neutral-400 text-sm">
+                      Feature Demo {i + 1}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -121,8 +145,12 @@ export function BusinessSection() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <section id="use-cases" className="relative w-full bg-white py-20 md:py-28">
+    <section
+      id="use-cases"
+      className="relative w-full bg-white py-20 md:py-28"
+    >
       <div className="mx-auto max-w-6xl px-4">
+        {/* Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -137,10 +165,11 @@ export function BusinessSection() {
           </h2>
         </motion.div>
 
+        {/* Cards */}
         <div className="flex flex-col md:flex-row gap-4 md:h-[420px]">
           {useCases.map((item, i) => {
             const isHovered = hoveredIndex === i;
-            
+
             return (
               <motion.article
                 key={item.title}
@@ -153,11 +182,11 @@ export function BusinessSection() {
                 className={`
                   relative flex flex-col rounded-3xl bg-gradient-to-b ${item.color} 
                   p-6 transition-all duration-500 ease-out cursor-pointer overflow-hidden
-                  ${isHovered ? 'md:flex-[2]' : 'md:flex-1'}
+                  ${isHovered ? "md:flex-[2]" : "md:flex-1"}
                   min-h-[280px] md:min-h-0
                 `}
               >
-                {/* Title Section */}
+                {/* Title */}
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold text-neutral-900">
                     {item.title}
@@ -167,7 +196,7 @@ export function BusinessSection() {
                   </p>
                 </div>
 
-                {/* Description - Only visible on hover */}
+                {/* Description */}
                 <motion.div
                   initial={false}
                   animate={{
@@ -177,22 +206,23 @@ export function BusinessSection() {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <p className="text-sm text-neutral-600 leading-relaxed mb-4">
+                  <p className="text-sm text-neutral-600 leading-relaxed mb-6 md:mb-4">
                     {item.description}
                   </p>
                 </motion.div>
 
-                {/* Spacer */}
                 <div className="flex-1" />
 
-                {/* Decorative Illustration Placeholder */}
-                <div className="flex justify-center items-end mb-4 h-32">
-                  <div className="w-24 h-24 rounded-2xl bg-white/60 backdrop-blur-sm shadow-lg flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300" />
-                  </div>
+                {/* Illustration */}
+                <div className="flex justify-center items-end mb-4 mt-6 md:mt-0 aspect-[5/3] min-h-24 w-full">
+                  <FeatureIllustration
+                    type={item.type}
+                    priority={i === 0}
+                    className="w-full max-w-[500px] md:max-w-[280px] lg:max-w-[320px] aspect-[4/3] object-contain drop-shadow-lg transition-transform duration-300 md:group-hover:scale-95 mx-auto"
+                  />
                 </div>
 
-                {/* Action Button */}
+                {/* Button */}
                 <div className="flex justify-end">
                   <Link
                     href={item.href}
@@ -200,7 +230,7 @@ export function BusinessSection() {
                       flex items-center justify-center rounded-full 
                       border border-neutral-300 bg-white/80 backdrop-blur-sm
                       transition-all duration-300 hover:bg-white hover:scale-105
-                      ${isHovered ? 'px-4 py-2 gap-2' : 'w-10 h-10'}
+                      ${isHovered ? "px-4 py-2 gap-2" : "w-10 h-10"}
                     `}
                   >
                     {isHovered ? (
@@ -226,12 +256,16 @@ export function BusinessSection() {
 
 export function FinalCtaSection() {
   return (
-    <section id="register" className="relative w-full overflow-hidden bg-white py-20 md:py-28">
+    <section
+      id="register"
+      className="relative w-full overflow-hidden bg-white py-20 md:py-28"
+    >
       <div
         className="pointer-events-none absolute inset-0 opacity-50"
         aria-hidden
         style={{
-          backgroundImage: `radial-gradient(circle at center, rgb(100 116 139) 1px, transparent 1px)`,
+          backgroundImage:
+            "radial-gradient(circle at center, rgb(100 116 139) 1px, transparent 1px)",
           backgroundSize: "24px 24px",
         }}
       />
@@ -239,12 +273,13 @@ export function FinalCtaSection() {
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true }} 
           transition={{ duration: 0.5 }}
           className="text-2xl font-bold tracking-tight text-neutral-900 md:text-3xl"
         >
           LOKA
         </motion.h2>
+
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -254,14 +289,6 @@ export function FinalCtaSection() {
         >
           For Your Brand. Manage Your Profits. Smarter.
         </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8"
-        >
-        </motion.div>
       </div>
     </section>
   );

@@ -679,10 +679,10 @@ function MapControls({
     setWaitingForLocation(true);
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        (position) => {
           const coords = {
-            longitude: pos.coords.longitude,
-            latitude: pos.coords.latitude,
+            longitude: position.coords.longitude,
+            latitude: position.coords.latitude,
           };
           map?.flyTo({
             center: [coords.longitude, coords.latitude],
@@ -693,8 +693,16 @@ function MapControls({
           setWaitingForLocation(false);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error("Error getting location:", {
+            code: error.code,
+            message: error.message,
+          });
           setWaitingForLocation(false);
+        },
+        {
+          enableHighAccuracy: true, // tambahkan ini untuk akurasi lebih baik
+          timeout: 10000,           // opsional: batasi waktu tunggu
+          maximumAge: 0,            // opsional: jangan pakai cache lokasi lama
         }
       );
     }
