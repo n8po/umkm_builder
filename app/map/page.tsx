@@ -38,7 +38,38 @@ const retailers = [
     address: "Limmatstrasse 23, 8005, Zürich",
     region: "Industriequartier",
   },
+  {
+    id: 6,
+    name: "k kiosk Bellevue",
+    address: "Theaterstrasse 2, 8001, Zürich",
+    region: "City Center",
+  },
+  {
+    id: 7,
+    name: "Valora Outlet",
+    address: "Europaallee 4, 8004, Zürich",
+    region: "Langstrasse",
+  },
+  {
+    id: 8,
+    name: "avec Stadelhofen",
+    address: "Stadelhoferstrasse 12, 8001, Zürich",
+    region: "Riesbach",
+  },
+  {
+    id: 9,
+    name: "Press & Books Oerlikon",
+    address: "Max-Bill-Platz 3, 8050, Zürich",
+    region: "Oerlikon",
+  },
+  {
+    id: 10,
+    name: "Coop City Zürich",
+    address: "Bahnhofstrasse 57, 8001, Zürich",
+    region: "City Center",
+  },
 ];
+
 
 export default function MapPage() {
   const mapRef = useRef<any>(null);
@@ -75,9 +106,9 @@ export default function MapPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
 
-      <main className="flex-1 pt-14 bg-white flex flex-col lg:flex-row gap-0 lg:gap-4">
+      <main className="flex-1 pt-14 bg-white flex flex-col lg:flex-row gap-0 lg:gap-4 overflow-hidden">
         {/* 🔹 LEFT: SEARCH & LIST */}
-        <div className="w-full lg:max-w-md flex flex-col bg-white px-6">
+        <div className="w-full lg:max-w-md flex flex-col bg-white px-6 overflow-hidden">
           <div className="pt-8 pb-4">
             <h2 className="text-3xl font-bold tracking-tight text-neutral-900 mb-2">
               Find a retailer.
@@ -110,11 +141,10 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* SPACER — pushes list to bottom on desktop */}
-          <div className="hidden lg:block lg:flex-1" />
+
 
           {/* LIST */}
-          <div className="overflow-y-auto">
+          <div className="overflow-y-scroll" style={{ maxHeight: "360px" }}>
             {retailers.map((store) => (
               <div
                 key={store.id}
