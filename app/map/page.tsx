@@ -182,7 +182,6 @@ export default function MapPage() {
               ref={mapRef}
               center={[2.3522, 48.8566]}
               zoom={11}
-              className="w-full h-full"
             >
               <MapControls
                 position="bottom-right"
