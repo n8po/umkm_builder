@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +18,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,11 +31,32 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
+  const supabase = createClient();
+
+  // Isi email otomatis dan tampilkan error jika di-redirect dari halaman login
+  useEffect(() => {
+    const emailFromQuery = searchParams.get("email");
+    if (emailFromQuery) setEmail(decodeURIComponent(emailFromQuery));
+
+    const errorParam = searchParams.get("error");
+    if (errorParam === "register_first") {
+      toast.error("Akun Google belum terdaftar", {
+        description: "Silakan daftar akun baru terlebih dahulu.",
+      });
+      // Optional: keep setError if you want persistent error message in form too
+      setError("Akun Google kamu belum terdaftar. Silakan daftar terlebih dahulu.");
+    }
+  }, [searchParams]);
+
+  // Register dengan Email & Password
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!name || !email || !password || !confirmPassword) {
       setError("Semua field harus diisi.");
@@ -56,14 +81,48 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // TODO: Integrate with registration API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      // Redirect on success
-      window.location.href = "/login";
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setError(error.message || "Terjadi kesalahan saat mendaftar.");
+        return;
+      }
+
+      // Tampilkan pesan verifikasi email
+      setSuccess(
+        "Akun berhasil dibuat! Cek email kamu untuk verifikasi sebelum masuk."
+      );
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Register/Login dengan Google
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    setError("");
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      setError("Gagal daftar dengan Google. Silakan coba lagi.");
+      setIsGoogleLoading(false);
     }
   };
 
@@ -102,6 +161,13 @@ export default function RegisterPage() {
           </CardHeader>
 
           <CardContent>
+            {/* Success message */}
+            {success && (
+              <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                {success}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Error message */}
               {error && (
@@ -235,7 +301,7 @@ export default function RegisterPage() {
                     href="#"
                     className="text-neutral-900 underline hover:no-underline"
                   >
-                    Syarat & Ketentuan
+                    Syarat &amp; Ketentuan
                   </Link>{" "}
                   dan{" "}
                   <Link
@@ -251,7 +317,7 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 className="w-full bg-neutral-900 text-white hover:bg-neutral-800"
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
               >
                 {isLoading ? (
                   <>
@@ -272,13 +338,16 @@ export default function RegisterPage() {
               </span>
             </div>
 
-            {/* Social signup buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                className="border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300"
-                disabled={isLoading}
-              >
+            {/* Google signup button */}
+            <Button
+              variant="outline"
+              className="w-full border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300"
+              disabled={isLoading || isGoogleLoading}
+              onClick={handleGoogleLogin}
+            >
+              {isGoogleLoading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
                 <svg className="size-4" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -297,19 +366,9 @@ export default function RegisterPage() {
                     fill="#EA4335"
                   />
                 </svg>
-                Google
-              </Button>
-              <Button
-                variant="outline"
-                className="border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300"
-                disabled={isLoading}
-              >
-                <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                </svg>
-                GitHub
-              </Button>
-            </div>
+              )}
+              Daftar dengan Google
+            </Button>
           </CardContent>
 
           <CardFooter className="justify-center">

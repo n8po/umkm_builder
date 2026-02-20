@@ -4,7 +4,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
-type ProviderName = 'openai' | 'anthropic' | 'groq' | 'google';
+type ProviderName = 'openai' | 'anthropic' | 'groq' | 'google' | 'ollama';
 
 // Client function type returned by @ai-sdk providers
 export type ProviderClient =
@@ -40,6 +40,8 @@ function getEnvDefaults(provider: ProviderName): { apiKey?: string; baseURL?: st
       return { apiKey: process.env.GROQ_API_KEY, baseURL: process.env.GROQ_BASE_URL };
     case 'google':
       return { apiKey: process.env.GEMINI_API_KEY, baseURL: process.env.GEMINI_BASE_URL };
+    case 'ollama':
+      return { apiKey: 'ollama', baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1' };
     default:
       return {};
   }
@@ -67,6 +69,12 @@ function getOrCreateClient(provider: ProviderName, apiKey?: string, baseURL?: st
       break;
     case 'google':
       client = createGoogleGenerativeAI({ apiKey: effective.apiKey || getEnvDefaults('google').apiKey, baseURL: effective.baseURL ?? getEnvDefaults('google').baseURL });
+      break;
+    case 'ollama':
+      client = createOpenAI({
+        apiKey: 'ollama', // Ollama doesn't need a real key
+        baseURL: effective.baseURL ?? getEnvDefaults('ollama').baseURL,
+      });
       break;
     default:
       client = createGroq({ apiKey: effective.apiKey || getEnvDefaults('groq').apiKey, baseURL: effective.baseURL ?? getEnvDefaults('groq').baseURL });
@@ -109,6 +117,12 @@ export function getProviderForModel(modelId: string): ProviderResolution {
   if (isGoogle) {
     const client = getOrCreateClient('google');
     return { client, actualModel: modelId.replace('google/', '') };
+  }
+
+  // Handle Ollama models
+  if (modelId.startsWith('ollama/')) {
+    const client = getOrCreateClient('ollama');
+    return { client, actualModel: modelId.replace('ollama/', '') };
   }
 
   // Default: use Groq with modelId as-is

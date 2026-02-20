@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Plus,
   MessageSquare,
   Settings,
   Home,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { SettingsDialog } from "./settings-dialog";
 import type { ChatSession, AISettings } from "./types";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 interface ChatSidebarProps {
   open: boolean;
@@ -37,6 +42,27 @@ export function ChatSidebar({
   onAiSettingsChange,
 }: ChatSidebarProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) =>
+      setUser(session?.user ?? null)
+    );
+    return () => listener.subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast.info("Kamu telah keluar", { description: "Sampai jumpa lagi!" });
+    window.location.href = "/";
+  };
+
+  const getInitials = (u: User) => {
+    const name = u.user_metadata?.full_name || u.email || "";
+    return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+  };
 
   return (
     <>
@@ -128,6 +154,33 @@ export function ChatSidebar({
             <Settings className="size-3.5" />
             Pengaturan
           </Button>
+
+          {/* User avatar & info */}
+          {user && (
+            <div className="mt-2 pt-2 border-t border-neutral-200">
+              <div className="flex items-center gap-2.5 px-1 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors">
+                <Avatar className="size-7 shrink-0">
+                  <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || "User"} />
+                  <AvatarFallback className="bg-neutral-900 text-white text-xs font-medium">
+                    {getInitials(user)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-neutral-800 truncate">
+                    {user.user_metadata?.full_name || "User"}
+                  </p>
+                  <p className="text-[10px] text-neutral-400 truncate">{user.email}</p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  title="Keluar"
+                  className="text-neutral-400 hover:text-red-500 transition-colors p-1 rounded"
+                >
+                  <LogOut className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

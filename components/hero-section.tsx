@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 
 export function HeroSection() {
   const router = useRouter();
-  
+
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -58,7 +58,7 @@ export function HeroSection() {
           variants={itemVariants}
           className="mb-6 max-w-3xl text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl lg:text-6xl font-heading"
         >
-            From idea to online website in minutes.
+          From idea to online website in minutes.
         </motion.h1>
 
         {/* Optional subtext - minimal */}
@@ -81,7 +81,7 @@ export function HeroSection() {
             showShimmer={false}
             showRocket={false}
             onStart={async () => {
-              router.push("#chat");
+              router.push("/chat");
             }}
             className="gap-2 rounded-md bg-neutral-900 text-white hover:bg-neutral-800"
             icon={<Rocket className="h-4 w-4" aria-hidden />}
@@ -93,7 +93,7 @@ export function HeroSection() {
             asChild
           >
             <Link href="#use-cases">See how it works
-            <RippleButtonRipples />
+              <RippleButtonRipples />
             </Link>
           </RippleButton>
         </motion.div>
