@@ -23,7 +23,6 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import {
   Avatar,
@@ -38,7 +37,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+
+type SessionUser = {
+  id?: string | null;
+  email?: string | null;
+};
 
 const useCasesItems = [
   { label: "AI Web Builder", href: "/ai-chat", icon: Sparkles },
@@ -217,8 +220,8 @@ function UseCasesMegaMenu({
 }
 
 // Helper: ambil inisial dari nama/email
-function getInitials(user: SupabaseUser): string {
-  const name = user.user_metadata?.full_name || user.email || "";
+function getInitials(user: SessionUser): string {
+  const name = user.email || "";
   return name
     .split(" ")
     .map((n: string) => n[0])
@@ -230,35 +233,29 @@ function getInitials(user: SupabaseUser): string {
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [useCasesOpen, setUseCasesOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const headerVisible = useHeaderVisibility();
-  const supabase = createClient();
 
-  // Cek status login saat mount & listen perubahan auth
+  // Cek status login saat mount
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (event === "SIGNED_IN") {
-        toast.success("Login berhasil!", {
-          description: `Selamat datang, ${session?.user?.user_metadata?.full_name || session?.user?.email || "pengguna"}!`,
-        });
+    const loadSession = async () => {
+      try {
+        const response = await fetch("/api/auth/session", { cache: "no-store" });
+        const data = await response.json();
+        setUser(data?.authenticated ? data.user : null);
+      } catch {
+        setUser(null);
       }
-      if (event === "SIGNED_OUT") {
-        toast.info("Kamu telah keluar", {
-          description: "Sampai jumpa lagi!",
-        });
-      }
-    });
+    };
 
-    return () => listener.subscription.unsubscribe();
-  }, [supabase.auth]);
+    void loadSession();
+  }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await fetch("/api/auth/session", { method: "DELETE" });
+    toast.info("Kamu telah keluar", {
+      description: "Sampai jumpa lagi!",
+    });
     window.location.href = "/";
   };
 
@@ -321,15 +318,15 @@ export function Header() {
                 Find Retailer
               </Link>
 
-              {/* Avatar dropdown (saat login) atau tombol Sign In */}
+              {/* Avatar dropdown (saat login) atau tombol Sign in */}
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="hidden md:flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400">
                       <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-neutral-200 hover:ring-neutral-400 transition-all">
                         <AvatarImage
-                          src={user.user_metadata?.avatar_url}
-                          alt={user.user_metadata?.full_name || user.email || "User"}
+                          src={undefined}
+                          alt={user.email || "User"}
                         />
                         <AvatarFallback className="bg-neutral-900 text-white text-sm font-medium">
                           {getInitials(user)}
@@ -340,7 +337,7 @@ export function Header() {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>
                       <p className="font-medium text-neutral-900 truncate">
-                        {user.user_metadata?.full_name || "User"}
+                        {user.email || "User"}
                       </p>
                       <p className="text-xs text-neutral-500 font-normal truncate">
                         {user.email}
@@ -375,7 +372,7 @@ export function Header() {
                     size="lg"
                     className="gap-4 rounded-md bg-blue-600 px-4 text-lg text-white hover:bg-blue-700"
                   >
-                    Register Now!
+                    Sign in
                     <RippleButtonRipples />
                   </RippleButton>
                 </Link>

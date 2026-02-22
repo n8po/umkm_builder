@@ -15,27 +15,24 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, Phone } from "lucide-react";
+import { getBackendBaseUrl } from "@/lib/backend-url";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const supabase = createClient();
+  const backendBaseUrl = getBackendBaseUrl();
 
   // Isi email otomatis dan tampilkan error jika di-redirect dari halaman login
   useEffect(() => {
@@ -58,7 +55,7 @@ export default function RegisterPage() {
     setError("");
     setSuccess("");
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!fullName || !email || !password) {
       setError("Semua field harus diisi.");
       return;
     }
@@ -68,39 +65,41 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Konfirmasi password tidak cocok.");
-      return;
-    }
-
-    if (!agreeTerms) {
-      setError("Kamu harus menyetujui syarat dan ketentuan.");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const response = await fetch(`${backendBaseUrl}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: fullName,
+          phone: phone || null,
+        }),
       });
 
-      if (error) {
-        setError(error.message || "Terjadi kesalahan saat mendaftar.");
+      const data = await response.json();
+      if (!response.ok || !data?.access_token) {
+        setError(data?.detail || "Terjadi kesalahan saat mendaftar.");
         return;
       }
 
-      // Tampilkan pesan verifikasi email
-      setSuccess(
-        "Akun berhasil dibuat! Cek email kamu untuk verifikasi sebelum masuk."
-      );
+      const sessionRes = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken: data.access_token }),
+      });
+
+      if (!sessionRes.ok) {
+        setError("Akun berhasil dibuat, tetapi gagal menyimpan sesi login.");
+        return;
+      }
+
+      setSuccess("Akun berhasil dibuat. Mengarahkan ke workspace...");
+      setTimeout(() => {
+        window.location.href = "/ai-chat";
+      }, 600);
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
@@ -113,17 +112,9 @@ export default function RegisterPage() {
     setIsGoogleLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setError("Gagal daftar dengan Google. Silakan coba lagi.");
-      setIsGoogleLoading(false);
-    }
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const oauthStart = `${backendBaseUrl}/api/auth/oauth/google/login?next=${encodeURIComponent(callbackUrl)}`;
+    window.location.href = oauthStart;
   };
 
   return (
@@ -178,7 +169,7 @@ export default function RegisterPage() {
 
               {/* Full Name */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-neutral-700">
+                <Label htmlFor="name" className="text-neutral-500">
                   Nama Lengkap
                 </Label>
                 <div className="relative">
@@ -187,8 +178,8 @@ export default function RegisterPage() {
                     id="name"
                     type="text"
                     placeholder="Nama lengkap kamu"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     className="pl-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
                     disabled={isLoading}
                     required
@@ -196,9 +187,28 @@ export default function RegisterPage() {
                 </div>
               </div>
 
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-neutral-500">
+                  Nomor Telepon
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="08xxxxxxxxxx"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="pl-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-neutral-700">
+                <Label htmlFor="email" className="text-neutral-500">
                   Email
                 </Label>
                 <div className="relative">
@@ -218,7 +228,7 @@ export default function RegisterPage() {
 
               {/* Password */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-neutral-700">
+                <Label htmlFor="password" className="text-neutral-500">
                   Password
                 </Label>
                 <div className="relative">
@@ -247,70 +257,6 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password" className="text-neutral-700">
-                  Konfirmasi Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-                  <Input
-                    id="confirm-password"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Ulangi password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10 pr-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
-                    disabled={isLoading}
-                    required
-                    minLength={8}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Agree terms */}
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="terms"
-                  checked={agreeTerms}
-                  onCheckedChange={(checked) =>
-                    setAgreeTerms(checked as boolean)
-                  }
-                  className="mt-0.5"
-                />
-                <Label
-                  htmlFor="terms"
-                  className="text-sm text-neutral-600 font-normal cursor-pointer leading-snug"
-                >
-                  Saya menyetujui{" "}
-                  <Link
-                    href="#"
-                    className="text-neutral-900 underline hover:no-underline"
-                  >
-                    Syarat &amp; Ketentuan
-                  </Link>{" "}
-                  dan{" "}
-                  <Link
-                    href="#"
-                    className="text-neutral-900 underline hover:no-underline"
-                  >
-                    Kebijakan Privasi
-                  </Link>
-                </Label>
               </div>
 
               {/* Submit */}

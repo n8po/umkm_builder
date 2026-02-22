@@ -172,8 +172,8 @@ export function MobileNav({
             className="gap-4 rounded-md bg-blue-600 px-4 text-lg text-white hover:bg-blue-700"
             asChild
           >
-            <Link href="#activate" onClick={onClose}>
-              Activate card
+            <Link href="/register" onClick={onClose}>
+              Sign in
               <RippleButtonRipples />
             </Link>
           </RippleButton>

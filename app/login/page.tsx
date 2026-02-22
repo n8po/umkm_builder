@@ -16,14 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import { getBackendBaseUrl } from "@/lib/backend-url";
 import { toast } from "sonner";
 
-type Step = "email" | "password";
-
 export default function LoginPage() {
-  const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,10 +28,10 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const supabase = createClient();
+  const backendBaseUrl = getBackendBaseUrl();
 
-  // Step 1: Cek apakah email terdaftar
-  const handleCheckEmail = async (e: React.FormEvent) => {
+  // Login dengan email + password
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -42,40 +39,6 @@ export default function LoginPage() {
       setError("Email harus diisi.");
       return;
     }
-
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/check-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-
-      if (data.exists) {
-        // Email ditemukan → tampilkan form password
-        setStep("password");
-      } else {
-        // Email belum terdaftar → beri notifikasi & arahkan ke register
-        toast.info("Akun belum terdaftar", {
-          description: "Kamu akan diarahkan ke halaman pendaftaran.",
-        });
-        setTimeout(() => {
-          router.push(`/register?email=${encodeURIComponent(email)}`);
-        }, 1500);
-      }
-    } catch {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Step 2: Login dengan password
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
 
     if (!password) {
       setError("Password harus diisi.");
@@ -85,13 +48,30 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch(`${backendBaseUrl}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
-      if (error) {
-        setError("Password salah. Silakan coba lagi.");
+      const data = await response.json();
+
+      if (!response.ok || !data?.access_token) {
+        setError(data?.detail || "Email atau password salah.");
+        return;
+      }
+
+      const sessionRes = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken: data.access_token }),
+      });
+
+      if (!sessionRes.ok) {
+        setError("Gagal menyimpan sesi login.");
         return;
       }
 
@@ -108,17 +88,9 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?from=login`,
-      },
-    });
-
-    if (error) {
-      setError("Gagal login dengan Google. Silakan coba lagi.");
-      setIsGoogleLoading(false);
-    }
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const oauthStart = `${backendBaseUrl}/api/auth/oauth/google/login?next=${encodeURIComponent(callbackUrl)}`;
+    window.location.href = oauthStart;
   };
 
   return (
@@ -149,13 +121,9 @@ export default function LoginPage() {
 
         <Card className="border-neutral-200 shadow-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-xl text-neutral-900">
-              {step === "email" ? "Masuk" : "Masukkan Password"}
-            </CardTitle>
+            <CardTitle className="text-xl text-neutral-900">Masuk</CardTitle>
             <CardDescription className="text-neutral-500">
-              {step === "email"
-                ? "Masukkan email kamu untuk melanjutkan"
-                : `Masuk sebagai ${email}`}
+              Masukkan email dan password kamu untuk melanjutkan
             </CardDescription>
           </CardHeader>
 
@@ -167,115 +135,81 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* STEP 1: Input Email */}
-            {step === "email" && (
-              <form onSubmit={handleCheckEmail} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-neutral-700">
-                    Email
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-neutral-700">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="nama@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
+                    disabled={isLoading}
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-neutral-700">
+                    Password
                   </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="nama@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
-                      disabled={isLoading}
-                      required
-                      autoFocus
-                    />
-                  </div>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-neutral-500 hover:text-neutral-900 transition-colors"
+                  >
+                    Lupa password?
+                  </Link>
                 </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-neutral-900 text-white hover:bg-neutral-800"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Memeriksa...
-                    </>
-                  ) : (
-                    "Lanjutkan"
-                  )}
-                </Button>
-              </form>
-            )}
-
-            {/* STEP 2: Input Password */}
-            {step === "password" && (
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-neutral-700">
-                      Password
-                    </Label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-xs text-neutral-500 hover:text-neutral-900 transition-colors"
-                    >
-                      Lupa password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
-                      disabled={isLoading}
-                      required
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
-                    </button>
-                  </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Masukkan password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
+                    disabled={isLoading}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </button>
                 </div>
+              </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-neutral-900 text-white hover:bg-neutral-800"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Memproses...
-                    </>
-                  ) : (
-                    "Masuk"
-                  )}
-                </Button>
-
-                {/* Kembali ke step email */}
-                <button
-                  type="button"
-                  onClick={() => { setStep("email"); setError(""); setPassword(""); }}
-                  className="flex w-full items-center justify-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-700 transition-colors"
-                >
-                  <ArrowLeft className="size-3.5" />
-                  Gunakan email lain
-                </button>
-              </form>
-            )}
+              <Button
+                type="submit"
+                className="w-full bg-neutral-900 text-white hover:bg-neutral-800"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  "Masuk"
+                )}
+              </Button>
+            </form>
 
             {/* Divider */}
             <div className="relative">

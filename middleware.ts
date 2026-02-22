@@ -1,33 +1,24 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({ request })
+    const { pathname } = request.nextUrl
+    const token = request.cookies.get('umkm_access_token')?.value
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll()
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value)
-                    )
-                    supabaseResponse = NextResponse.next({ request })
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    )
-                },
-            },
-        }
-    )
+    const protectedPrefixes = ['/ai-chat', '/cost-analysis']
+    const isProtectedRoute = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
 
-    await supabase.auth.getUser()
+    if (isProtectedRoute && !token) {
+        const loginUrl = new URL('/login', request.url)
+        return NextResponse.redirect(loginUrl)
+    }
 
-    return supabaseResponse
+    const authRoutes = ['/login', '/register']
+    const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
+    if (isAuthRoute && token) {
+        return NextResponse.redirect(new URL('/ai-chat', request.url))
+    }
+
+    return NextResponse.next({ request })
 }
 
 export const config = {
