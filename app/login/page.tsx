@@ -30,7 +30,6 @@ export default function LoginPage() {
   const router = useRouter();
   const backendBaseUrl = getBackendBaseUrl();
 
-  // Login dengan email + password
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -67,7 +66,10 @@ export default function LoginPage() {
       const sessionRes = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: data.access_token }),
+        body: JSON.stringify({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token
+        }),
       });
 
       if (!sessionRes.ok) {

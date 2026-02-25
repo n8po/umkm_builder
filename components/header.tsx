@@ -19,6 +19,8 @@ import {
   LogOut,
   User,
   LayoutDashboard,
+  Settings,
+  ArrowUpRight,
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MobileNav } from "@/components/mobile-nav";
@@ -29,14 +31,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 
 type SessionUser = {
   id?: string | null;
@@ -233,7 +228,9 @@ function getInitials(user: SessionUser): string {
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [useCasesOpen, setUseCasesOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<SessionUser | null>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const headerVisible = useHeaderVisibility();
 
   // Cek status login saat mount
@@ -252,12 +249,32 @@ export function Header() {
   }, []);
 
   const handleSignOut = async () => {
+    setProfileOpen(false);
     await fetch("/api/auth/session", { method: "DELETE" });
     toast.info("Kamu telah keluar", {
       description: "Sampai jumpa lagi!",
     });
     window.location.href = "/";
   };
+
+  // Close profile dropdown on click outside
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setProfileOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [profileOpen]);
 
   return (
     <>
@@ -318,61 +335,125 @@ export function Header() {
                 Find Retailer
               </Link>
 
-              {/* Avatar dropdown (saat login) atau tombol Sign in */}
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="hidden md:flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400">
-                      <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-neutral-200 hover:ring-neutral-400 transition-all">
-                        <AvatarImage
-                          src={undefined}
-                          alt={user.email || "User"}
-                        />
+                <div ref={profileRef} className="relative hidden md:block">
+                  {/* Trigger Button */}
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                  >
+                    <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-neutral-200 hover:ring-neutral-400 transition-all">
+                      <AvatarImage src={undefined} alt={user.email || "User"} />
+                      <AvatarFallback className="bg-neutral-900 text-white text-sm font-medium">
+                        {getInitials(user)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+
+                  {/* Dropdown Panel */}
+                  <div
+                    className={cn(
+                      "dropdown-motion absolute right-0 top-full mt-2 w-64 rounded-xl border border-neutral-200 bg-white shadow-lg",
+                    )}
+                    data-state={profileOpen ? "open" : "closed"}
+                  >
+                    {/* Header: Avatar + Name + Email */}
+                    <div className="dropdown-item-motion flex items-center gap-3 px-4 py-3" data-state={profileOpen ? "open" : "closed"} style={{ transitionDelay: profileOpen ? "80ms" : "0ms" }}>
+                      <Avatar className="h-9 w-9 shrink-0">
+                        <AvatarImage src={undefined} alt={user.email || "User"} />
                         <AvatarFallback className="bg-neutral-900 text-white text-sm font-medium">
                           {getInitials(user)}
                         </AvatarFallback>
                       </Avatar>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <p className="font-medium text-neutral-900 truncate">
-                        {user.email || "User"}
-                      </p>
-                      <p className="text-xs text-neutral-500 font-normal truncate">
-                        {user.email}
-                      </p>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/ai-chat" className="cursor-pointer">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        AI Web Builder
+                      <div className="flex flex-col min-w-0">
+                        <p className="text-sm font-semibold text-neutral-900 truncate">
+                          {user.email?.split("@")[0] || "User"}
+                        </p>
+                        <p className="text-xs text-neutral-500 truncate">
+                          @{user.email?.split("@")[0] || "user"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-neutral-100" />
+
+                    {/* Menu Items */}
+                    <div className="py-1.5">
+                      {[
+                        { href: "/ai-chat", icon: Sparkles, label: "AI Web Builder" },
+                        { href: "/cost-analysis", icon: ChartLine, label: "Cost Analysis" },
+                        { href: "/profile", icon: Settings, label: "Settings" },
+                      ].map((item, i) => {
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setProfileOpen(false)}
+                            className="dropdown-item-motion flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                            data-state={profileOpen ? "open" : "closed"}
+                            style={{ transitionDelay: profileOpen ? `${150 + i * 50}ms` : "0ms" }}
+                          >
+                            <Icon className="h-4 w-4 text-neutral-500" />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+
+                    <div className="h-px bg-neutral-100" />
+
+                    {/* Logout */}
+                    <div className="py-1.5">
+                      <button
+                        onClick={handleSignOut}
+                        className="dropdown-item-motion flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        data-state={profileOpen ? "open" : "closed"}
+                        style={{ transitionDelay: profileOpen ? "320ms" : "0ms" }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Log out
+                      </button>
+                    </div>
+
+                    <div className="h-px bg-neutral-100" />
+
+                    {/* Bottom Footer: Tier + Upgrade */}
+                    <div className="dropdown-item-motion flex items-center justify-between gap-2 px-4 py-3 bg-neutral-50 rounded-b-xl" data-state={profileOpen ? "open" : "closed"} style={{ transitionDelay: profileOpen ? "380ms" : "0ms" }}>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Avatar className="h-7 w-7 shrink-0">
+                          <AvatarImage src={undefined} alt={user.email || "User"} />
+                          <AvatarFallback className="bg-neutral-900 text-white text-xs font-medium">
+                            {getInitials(user)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col min-w-0">
+                          <p className="text-xs font-medium text-neutral-800 truncate">
+                            {user.email?.split("@")[0] || "User"}
+                          </p>
+                          <p className="text-[10px] text-neutral-500 uppercase tracking-wider font-medium">
+                            Free
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        href="/pricing"
+                        onClick={() => setProfileOpen(false)}
+                        className="shrink-0 inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition-colors"
+                      >
+                        Upgrade
+                        <ArrowUpRight className="h-3 w-3" />
                       </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
-                        Profil
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleSignOut}
-                      className="text-red-600 focus:text-red-600 cursor-pointer"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Keluar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <Link href="/register" className="hidden md:inline-flex">
                   <RippleButton
                     size="lg"
                     className="gap-4 rounded-md bg-blue-600 px-4 text-lg text-white hover:bg-blue-700"
                   >
-                    Sign in
+                    Sign Up
                     <RippleButtonRipples />
                   </RippleButton>
                 </Link>

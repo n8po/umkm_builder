@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, User, Loader2, Phone } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import { getBackendBaseUrl } from "@/lib/backend-url";
 import { toast } from "sonner";
 
@@ -24,7 +24,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +75,6 @@ export default function RegisterPage() {
           email,
           password,
           full_name: fullName,
-          phone: phone || null,
         }),
       });
 
@@ -85,21 +84,13 @@ export default function RegisterPage() {
         return;
       }
 
-      const sessionRes = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: data.access_token }),
+      toast.success("Akun berhasil dibuat!", {
+        description: "Silakan masuk dengan email dan password kamu.",
       });
-
-      if (!sessionRes.ok) {
-        setError("Akun berhasil dibuat, tetapi gagal menyimpan sesi login.");
-        return;
-      }
-
-      setSuccess("Akun berhasil dibuat. Mengarahkan ke workspace...");
+      setSuccess("Akun berhasil dibuat! Mengarahkan ke halaman login...");
       setTimeout(() => {
-        window.location.href = "/ai-chat";
-      }, 600);
+        window.location.href = "/login";
+      }, 1500);
     } catch {
       setError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
@@ -183,25 +174,6 @@ export default function RegisterPage() {
                     className="pl-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
                     disabled={isLoading}
                     required
-                  />
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-neutral-500">
-                  Nomor Telepon
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="08xxxxxxxxxx"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10 border-neutral-200 focus-visible:border-neutral-400 focus-visible:ring-neutral-200"
-                    disabled={isLoading}
                   />
                 </div>
               </div>

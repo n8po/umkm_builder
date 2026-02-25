@@ -1,15 +1,32 @@
 "use client";
 
-import { Check, X } from "lucide-react"; 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Check, X, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function PricingSection() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session", { cache: "no-store" });
+        const data = await res.json();
+        setIsLoggedIn(!!data?.authenticated);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+    void checkSession();
+  }, []);
+
   const plans = [
     {
       id: "starter",
       name: "Free Plan",
-      description: "Perfect for startups and smallh teams",
+      description: "Perfect for startups and small teams",
       monthlyPrice: "Rp0",
       features: [
         { label: "Free 5 credits/day", included: true },
@@ -17,10 +34,6 @@ export default function PricingSection() {
         { label: "Basic Business Listing", included: false },
         { label: "Publish site", included: false },
       ],
-      button: {
-        text: "Free",
-        variant: "default",
-      }
     },
     {
       id: "growth",
@@ -33,11 +46,6 @@ export default function PricingSection() {
         { label: "Basic Business Listing", included: true },
         { label: "Publish site", included: true },
       ],
-      button: {
-        text: "Get Started",
-        url: "https://app.yoursaas.com/signup",
-        variant: "default"
-      }
     }
   ];
 
@@ -51,16 +59,37 @@ export default function PricingSection() {
               Flexible Plans for Every Stage
             </h2>
             <p className="text-slate-500 text-lg lg:text-xl max-w-xl mx-auto">
-              Whether you&#39;re just starting out or scaling fast, we’ve got a plan that fits your needs.
+              Whether you&#39;re just starting out or scaling fast, we&apos;ve got a plan that fits your needs.
             </p>
           </header>
-          
-
         </div>
 
         {/* CARDS SECTION */}
         <div className="flex flex-col items-stretch gap-8 md:flex-row w-full justify-center max-w-5xl mx-auto">
           {plans.map((plan) => {
+            const isStarter = plan.id === "starter";
+
+            // Tentukan teks & href tombol berdasarkan login status
+            let buttonText: string;
+            let buttonHref: string;
+            let buttonDisabled = false;
+            let showIcon = false;
+
+            if (isLoggedIn) {
+              if (isStarter) {
+                buttonText = "Current Plan";
+                buttonHref = "#";
+                buttonDisabled = true;
+              } else {
+                buttonText = "Upgrade";
+                buttonHref = "/pricing"; // nanti ganti ke checkout
+                showIcon = true;
+              }
+            } else {
+              buttonText = isStarter ? "Free" : "Get Started";
+              buttonHref = "/register";
+            }
+
             return (
               <Card
                 key={plan.id}
@@ -74,28 +103,25 @@ export default function PricingSection() {
                     <p className="text-slate-500 text-sm md:text-base leading-relaxed h-10">
                       {plan.description}
                     </p>
-                    
-                    {/* CONTAINER HARGA UTAMA */}
-                    {/* items-center agar badge diskon vertikalnya pas di tengah */}
-                    <div className="mt-8 flex flex-wrap items-center gap-3">
-                        <div className="flex items-baseline gap-1 whitespace-nowrap">
-                            <span className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950">
-                                {plan.monthlyPrice}
-                            </span>
-                            {plan.id !== "starter" && (
-                              <span className="text-slate-400 text-2xl font-medium">
-                                  /mo
-                              </span>
-                            )}
-                        </div>
-                        
 
+                    {/* CONTAINER HARGA UTAMA */}
+                    <div className="mt-8 flex flex-wrap items-center gap-3">
+                      <div className="flex items-baseline gap-1 whitespace-nowrap">
+                        <span className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950">
+                          {plan.monthlyPrice}
+                        </span>
+                        {!isStarter && (
+                          <span className="text-slate-400 text-2xl font-medium">
+                            /mo
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                   </CardHeader>
 
                   <CardContent className="p-0 flex-grow">
-                    <div className="w-full h-px bg-slate-100 mb-8" /> 
+                    <div className="w-full h-px bg-slate-100 mb-8" />
                     <ul className="space-y-4">
                       {plan.features.map((feature, index) => (
                         <li key={index} className="flex items-start gap-3">
@@ -115,16 +141,26 @@ export default function PricingSection() {
                       ))}
                     </ul>
                   </CardContent>
-                  
+
                   <CardFooter className="p-0 mt-10">
-                    <Button 
-                        asChild 
+                    {buttonDisabled ? (
+                      <Button
+                        disabled
+                        className="w-full h-12 rounded-full text-base font-semibold bg-slate-200 text-slate-500 cursor-not-allowed"
+                      >
+                        {buttonText}
+                      </Button>
+                    ) : (
+                      <Button
+                        asChild
                         className="w-full h-12 rounded-full text-base font-semibold bg-slate-950 text-white hover:bg-slate-800 transition-colors"
-                    >
-                      <a href={plan.button.url || "#"}>
-                        {plan.button.text}
-                      </a>
-                    </Button>
+                      >
+                        <Link href={buttonHref} className="flex items-center justify-center gap-2">
+                          {buttonText}
+                          {showIcon && <TrendingUp className="h-4 w-4" />}
+                        </Link>
+                      </Button>
+                    )}
                   </CardFooter>
                 </div>
               </Card>
