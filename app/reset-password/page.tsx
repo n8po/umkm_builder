@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Lock, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { getBackendBaseUrl } from "@/lib/backend-url";
+import { authService } from "@/lib/services";
 
 export default function ResetPasswordPage() {
     const [password, setPassword] = useState("");
@@ -28,7 +28,6 @@ export default function ResetPasswordPage() {
     const [isSuccess, setIsSuccess] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const backendBaseUrl = getBackendBaseUrl();
 
     // Supabase mengirim token via URL fragment (#access_token=...&refresh_token=...)
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -73,26 +72,20 @@ export default function ResetPasswordPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${backendBaseUrl}/api/auth/reset-password`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    new_password: password,
-                    access_token: accessToken,
-                    refresh_token: refreshToken,
-                }),
+            const data = await authService.resetPassword({
+                new_password: password,
+                access_token: accessToken,
+                refresh_token: refreshToken,
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
+            if (!data?.ok) {
                 setError(data?.detail || "Gagal mereset password.");
                 return;
             }
 
             setIsSuccess(true);
-        } catch {
-            setError("Terjadi kesalahan. Silakan coba lagi.");
+        } catch (err: any) {
+            setError(err?.detail || err?.message || "Terjadi kesalahan. Silakan coba lagi.");
         } finally {
             setIsLoading(false);
         }

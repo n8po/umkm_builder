@@ -1,14 +1,15 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { motion, type Variants } from "framer-motion";
 import {
-  Store,
+  ArrowRight,
+  Globe,
+  ShoppingBag,
   Palette,
   LayoutDashboard,
-  ShoppingBag,
-  Sparkles,
+  UtensilsCrossed,
 } from "lucide-react";
-import { LogoIcon } from "@/components/logo";
-import { cn } from "@/lib/utils";
 
 interface WelcomeScreenProps {
   onSendMessage: (content: string) => void;
@@ -16,89 +17,106 @@ interface WelcomeScreenProps {
 
 const suggestions = [
   {
-    icon: <Store className="size-4" />,
-    title: "Landing page UMKM",
-    description: "Buat landing page profesional untuk bisnis UMKM",
+    icon: <Globe className="size-5" />,
+    label: "Landing page UMKM",
+    iconBg: "bg-pink-100 text-pink-500",
     prompt:
       "Buatkan landing page profesional untuk UMKM makanan rumahan dengan hero section, menu produk, testimoni, dan kontak. Gunakan warna hangat dan desain modern.",
   },
   {
-    icon: <ShoppingBag className="size-4" />,
-    title: "Toko online sederhana",
-    description: "Website e-commerce dengan katalog produk",
+    icon: <ShoppingBag className="size-5" />,
+    label: "Toko online",
+    iconBg: "bg-red-100 text-red-500",
     prompt:
       "Buatkan website toko online sederhana dengan halaman katalog produk, detail produk, keranjang belanja, dan halaman checkout. Desain clean dan mobile-friendly.",
   },
   {
-    icon: <Palette className="size-4" />,
-    title: "Portfolio kreatif",
-    description: "Tampilkan karya dan layanan bisnis kreatif",
+    icon: <UtensilsCrossed className="size-5" />,
+    label: "Menu restoran",
+    iconBg: "bg-blue-100 text-blue-500",
     prompt:
-      "Buatkan website portfolio untuk bisnis jasa desain grafis. Tampilkan galeri karya, layanan yang ditawarkan, harga paket, dan form kontak. Gunakan desain minimal dan elegan.",
+      "Buatkan website menu untuk restoran dengan daftar menu lengkap, harga, foto makanan, jam buka, lokasi, dan tombol order via WhatsApp.",
   },
   {
-    icon: <LayoutDashboard className="size-4" />,
-    title: "Dashboard admin",
-    description: "Panel admin untuk manajemen bisnis",
+    icon: <Palette className="size-5" />,
+    label: "Portfolio kreatif",
+    iconBg: "bg-emerald-100 text-emerald-500",
     prompt:
-      "Buatkan dashboard admin sederhana dengan sidebar navigasi, halaman overview dengan chart penjualan, tabel pesanan terbaru, dan manajemen produk.",
+      "Buatkan website portfolio untuk bisnis jasa desain grafis. Tampilkan galeri karya, layanan, harga paket, dan form kontak. Desain minimal dan elegan.",
+  },
+  {
+    icon: <LayoutDashboard className="size-5" />,
+    label: "Company profile",
+    iconBg: "bg-orange-100 text-orange-500",
+    prompt:
+      "Buatkan website company profile untuk bisnis UMKM dengan halaman tentang kami, layanan, tim, dan kontak. Profesional dan modern.",
   },
 ];
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
 
 export function WelcomeScreen({ onSendMessage }: WelcomeScreenProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 py-12">
-      {/* Logo & Title */}
-      <div className="flex flex-col items-center gap-4 mb-10">
-        <div className="relative">
-          <div className="relative flex size-14 items-center justify-center rounded-2xl bg-neutral-900 shadow-sm">
-            <Sparkles className="size-7 text-white" />
-          </div>
-        </div>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex flex-col items-center w-full max-w-lg"
+      >
+        {/* Title */}
+        <motion.h1
+          variants={itemVariants}
+          className="text-3xl md:text-[38px] font-bold text-neutral-900 text-center mb-3 leading-tight tracking-tight"
+        >
+          Unlock the power of AI
+        </motion.h1>
 
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold text-neutral-900 font-heading">
-            Apa yang ingin kamu bangun?
-          </h1>
-          <p className="text-sm text-neutral-500 max-w-md">
-            Deskripsikan website yang kamu inginkan dan AI akan membuatkannya
-            secara instan. Kamu bisa mengedit dan menyempurnakan hasilnya.
-          </p>
-        </div>
-      </div>
+        {/* Subtitle */}
+        <motion.p
+          variants={itemVariants}
+          className="text-sm text-neutral-400 text-center max-w-sm mb-10"
+        >
+          Chat with the smartest AI — Build your UMKM website in minutes
+        </motion.p>
 
-      {/* Suggestion cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
-        {suggestions.map((suggestion) => (
-          <button
-            key={suggestion.title}
-            onClick={() => onSendMessage(suggestion.prompt)}
-            className={cn(
-              "group flex flex-col gap-2 rounded-xl p-4 text-left transition-all",
-              "bg-white border border-neutral-200 hover:border-neutral-300",
-              "hover:bg-neutral-50 hover:shadow-sm"
-            )}
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 transition-colors">
-                {suggestion.icon}
+        {/* Suggestion Rows */}
+        <motion.div variants={itemVariants} className="w-full space-y-2">
+          {suggestions.map((s, i) => (
+            <motion.button
+              key={s.label}
+              variants={itemVariants}
+              whileHover={{ x: 4, transition: { duration: 0.15 } }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => onSendMessage(s.prompt)}
+              className="group flex items-center justify-between w-full px-4 py-3.5 rounded-2xl border border-neutral-200/80 bg-white hover:border-neutral-300 hover:shadow-sm transition-all duration-200"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className={cn("flex size-10 items-center justify-center rounded-xl", s.iconBg)}>
+                  {s.icon}
+                </div>
+                <span className="text-[15px] font-semibold text-neutral-800">{s.label}</span>
               </div>
-              <span className="text-sm font-medium text-neutral-800 group-hover:text-neutral-900 transition-colors">
-                {suggestion.title}
-              </span>
-            </div>
-            <p className="text-xs text-neutral-400 group-hover:text-neutral-500 transition-colors pl-[42px]">
-              {suggestion.description}
-            </p>
-          </button>
-        ))}
-      </div>
-
-      {/* Bottom hint */}
-      <div className="mt-8 flex items-center gap-2 text-xs text-neutral-400">
-        <LogoIcon className="size-3.5" />
-        <span>Powered by AI — UMKM Builder</span>
-      </div>
+              <ArrowRight className="size-4 text-neutral-300 group-hover:text-neutral-500 group-hover:translate-x-0.5 transition-all duration-200" />
+            </motion.button>
+          ))}
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

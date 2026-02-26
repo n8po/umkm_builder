@@ -15,14 +15,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { getBackendBaseUrl } from "@/lib/backend-url";
+import { authService } from "@/lib/services";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [isSent, setIsSent] = useState(false);
-    const backendBaseUrl = getBackendBaseUrl();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,22 +35,16 @@ export default function ForgotPasswordPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${backendBaseUrl}/api/auth/forgot-password`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email.trim().toLowerCase() }),
-            });
+            const data = await authService.forgotPassword(email.trim().toLowerCase());
 
-            const data = await response.json();
-
-            if (!response.ok) {
+            if (!data?.ok) {
                 setError(data?.detail || "Gagal mengirim link reset password.");
                 return;
             }
 
             setIsSent(true);
-        } catch {
-            setError("Terjadi kesalahan. Silakan coba lagi.");
+        } catch (err: any) {
+            setError(err?.detail || err?.message || "Terjadi kesalahan. Silakan coba lagi.");
         } finally {
             setIsLoading(false);
         }

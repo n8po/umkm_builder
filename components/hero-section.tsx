@@ -81,7 +81,7 @@ export function HeroSection() {
             showShimmer={false}
             showRocket={false}
             onStart={async () => {
-              router.push("/chat");
+              router.push("/ai-chat");
             }}
             className="gap-2 rounded-md bg-neutral-900 text-white hover:bg-neutral-800"
             icon={<Rocket className="h-4 w-4" aria-hidden />}

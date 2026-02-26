@@ -1,20 +1,13 @@
 "use client";
 
 import { useState, useRef, useCallback, type KeyboardEvent } from "react";
-import { Button } from "@/components/ui/button";
 import {
   ArrowUp,
   Square,
-  Paperclip,
-  Globe,
-  Image as ImageIcon,
+  Plus,
+  AudioLines,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface ChatInputProps {
   onSendMessage: (content: string) => void;
@@ -27,7 +20,7 @@ export function ChatInput({
   onSendMessage,
   onStopGeneration,
   isGenerating,
-  placeholder = "Deskripsikan website yang ingin kamu buat...",
+  placeholder = "Type '/' for commands",
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -40,7 +33,6 @@ export function ChatInput({
     if (!value.trim()) return;
     onSendMessage(value);
     setValue("");
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
@@ -62,13 +54,12 @@ export function ChatInput({
   };
 
   return (
-    <div
-      className={cn(
-        "relative rounded-2xl border border-neutral-200 bg-white transition-colors",
-        "focus-within:border-neutral-400 focus-within:bg-white",
-        "shadow-sm"
-      )}
-    >
+    <div className="flex items-end gap-2 rounded-2xl border border-neutral-200 bg-neutral-50/50 px-3 py-2 transition-all focus-within:border-neutral-300 focus-within:bg-white focus-within:shadow-sm">
+      {/* Plus button */}
+      <button className="flex items-center justify-center size-8 shrink-0 rounded-full text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors mb-0.5">
+        <Plus className="size-4" />
+      </button>
+
       {/* Textarea */}
       <textarea
         ref={textareaRef}
@@ -78,77 +69,34 @@ export function ChatInput({
         onInput={handleInput}
         placeholder={placeholder}
         rows={1}
-        className={cn(
-          "w-full resize-none bg-transparent px-4 pt-4 pb-2 text-sm text-neutral-900",
-          "placeholder:text-neutral-400 outline-none",
-          "min-h-[44px] max-h-[200px]"
-        )}
-        disabled={false}
+        className="flex-1 resize-none bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 outline-none min-h-[32px] max-h-[200px] py-1.5"
       />
 
-      {/* Bottom toolbar */}
-      <div className="flex items-center justify-between px-3 pb-3">
-        <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg"
-              >
-                <Paperclip className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Lampirkan file</TooltipContent>
-          </Tooltip>
+      {/* Right buttons */}
+      <div className="flex items-center gap-1 shrink-0 mb-0.5">
+        {/* Voice / Mic button */}
+        <button className="flex items-center justify-center size-8 rounded-full text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors">
+          <AudioLines className="size-4" />
+        </button>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg"
-              >
-                <ImageIcon className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Upload gambar</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg"
-              >
-                <Globe className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Import dari URL</TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Send / Stop button */}
-        <Button
-          onClick={handleSubmit}
-          size="icon-xs"
-          className={cn(
-            "rounded-lg transition-all",
-            isGenerating
-              ? "bg-red-50 text-red-500 hover:bg-red-100"
-              : value.trim()
-                ? "bg-neutral-900 text-white hover:bg-neutral-800 shadow-sm"
-                : "bg-neutral-100 text-neutral-400"
-          )}
-          disabled={!isGenerating && !value.trim()}
-        >
-          {isGenerating ? (
-            <Square className="size-3 fill-current" />
-          ) : (
-            <ArrowUp className="size-3.5" />
-          )}
-        </Button>
+        {/* Send / Stop */}
+        {(isGenerating || value.trim()) && (
+          <button
+            onClick={handleSubmit}
+            className={cn(
+              "flex items-center justify-center size-8 rounded-full transition-all duration-200",
+              isGenerating
+                ? "bg-red-100 text-red-500 hover:bg-red-200"
+                : "bg-neutral-900 text-white hover:bg-neutral-800"
+            )}
+          >
+            {isGenerating ? (
+              <Square className="size-3 fill-current" />
+            ) : (
+              <ArrowUp className="size-4" />
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

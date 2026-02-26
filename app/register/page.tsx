@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LogoIcon } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +19,10 @@ import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import { getBackendBaseUrl } from "@/lib/backend-url";
 import { toast } from "sonner";
+import { authService } from "@/lib/services";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -68,31 +70,23 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${backendBaseUrl}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-          full_name: fullName,
-        }),
+      const data = await authService.register({
+        email,
+        password,
+        full_name: fullName,
       });
 
-      const data = await response.json();
-      if (!response.ok || !data?.access_token) {
+      if (!data?.access_token) {
         setError(data?.detail || "Terjadi kesalahan saat mendaftar.");
         return;
       }
 
       toast.success("Akun berhasil dibuat!", {
-        description: "Silakan masuk dengan email dan password kamu.",
+        description: "Selamat datang! Kamu langsung masuk.",
       });
-      setSuccess("Akun berhasil dibuat! Mengarahkan ke halaman login...");
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
-    } catch {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+      router.push("/ai-chat");
+    } catch (err: any) {
+      setError(err?.detail || err?.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }

@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Bot, User, AlertCircle, Copy, Check } from "lucide-react";
+import { AlertCircle, Copy, Check, Sparkles } from "lucide-react";
 import { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import type { ChatMessage } from "./types";
 
 interface ChatMessageBubbleProps {
@@ -20,84 +20,95 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
     setTimeout(() => setCopied(false), 2000);
   }, [message.content]);
 
+  // ═══ User message — right, dark bubble ═══
   if (isUser) {
     return (
-      <div className="flex justify-end py-2">
-        <div className="flex items-start gap-3 max-w-[85%]">
-          <div
-            className={cn(
-              "rounded-2xl rounded-br-md px-4 py-2.5",
-              "bg-neutral-900 text-white text-sm leading-relaxed",
-              "shadow-sm"
-            )}
-          >
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="flex justify-end py-1.5"
+      >
+        <div className="max-w-[80%]">
+          <div className="rounded-2xl rounded-br-md px-4 py-3 bg-neutral-900 text-white text-sm leading-relaxed shadow-sm">
             <p className="whitespace-pre-wrap">{message.content}</p>
           </div>
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 mt-0.5">
-            <User className="size-3.5 text-neutral-600" />
-          </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
+  // ═══ Assistant message — left, no bubble ═══
   return (
-    <div className="flex py-2">
-      <div className="flex items-start gap-3 max-w-[85%] group">
-        <div
-          className={cn(
-            "flex size-7 shrink-0 items-center justify-center rounded-full mt-0.5",
-            message.isError
-              ? "bg-red-100"
-              : "bg-neutral-100"
-          )}
-        >
-          {message.isError ? (
-            <AlertCircle className="size-3.5 text-red-500" />
-          ) : (
-            <Bot className="size-3.5 text-neutral-600" />
-          )}
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="flex py-1.5"
+    >
+      <div className="flex gap-3 max-w-[85%] group">
+        {/* AI Avatar */}
+        <div className="shrink-0 mt-1">
+          <div
+            className={cn(
+              "flex size-7 items-center justify-center rounded-full",
+              message.isError
+                ? "bg-red-100"
+                : "bg-gradient-to-br from-violet-500 to-blue-500"
+            )}
+          >
+            {message.isError ? (
+              <AlertCircle className="size-3.5 text-red-500" />
+            ) : (
+              <Sparkles className="size-3.5 text-white" />
+            )}
+          </div>
         </div>
 
         <div className="flex-1 min-w-0">
           <div
             className={cn(
-              "rounded-2xl rounded-bl-md px-4 py-2.5 text-sm leading-relaxed",
-              message.isError
-                ? "bg-red-50 text-red-700 border border-red-200"
-                : "bg-neutral-50 text-neutral-800 border border-neutral-200"
+              "text-sm leading-relaxed",
+              message.isError ? "text-red-600" : "text-neutral-700"
             )}
           >
             {message.content ? (
               <div className="whitespace-pre-wrap">{message.content}</div>
             ) : message.isStreaming ? (
-              <div className="flex gap-1 py-1">
-                <span className="size-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:0ms]" />
-                <span className="size-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:150ms]" />
-                <span className="size-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:300ms]" />
+              <div className="flex items-center gap-2 py-1">
+                <div className="flex gap-1">
+                  <span className="size-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:0ms]" />
+                  <span className="size-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:150ms]" />
+                  <span className="size-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:300ms]" />
+                </div>
+                <span className="text-xs text-neutral-400">Sedang memproses...</span>
               </div>
             ) : null}
           </div>
 
           {/* Copy button */}
           {message.content && !message.isStreaming && (
-            <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="icon-xs"
+            <div className="mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <button
                 onClick={handleCopy}
-                className="text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors"
               >
                 {copied ? (
-                  <Check className="size-3 text-green-600" />
+                  <>
+                    <Check className="size-3 text-emerald-500" />
+                    <span className="text-[10px] text-emerald-500">Tersalin</span>
+                  </>
                 ) : (
-                  <Copy className="size-3" />
+                  <>
+                    <Copy className="size-3" />
+                    <span className="text-[10px]">Salin</span>
+                  </>
                 )}
-              </Button>
+              </button>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

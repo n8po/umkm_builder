@@ -32,11 +32,8 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 
-
-type SessionUser = {
-  id?: string | null;
-  email?: string | null;
-};
+import { authService } from "@/lib/services";
+import type { SessionUser } from "@/lib/repositories";
 
 const useCasesItems = [
   { label: "AI Web Builder", href: "/ai-chat", icon: Sparkles },
@@ -236,13 +233,8 @@ export function Header() {
   // Cek status login saat mount
   useEffect(() => {
     const loadSession = async () => {
-      try {
-        const response = await fetch("/api/auth/session", { cache: "no-store" });
-        const data = await response.json();
-        setUser(data?.authenticated ? data.user : null);
-      } catch {
-        setUser(null);
-      }
+      const session = await authService.getSession();
+      setUser(session?.authenticated ? (session.user ?? null) : null);
     };
 
     void loadSession();
@@ -250,7 +242,7 @@ export function Header() {
 
   const handleSignOut = async () => {
     setProfileOpen(false);
-    await fetch("/api/auth/session", { method: "DELETE" });
+    await authService.logout();
     toast.info("Kamu telah keluar", {
       description: "Sampai jumpa lagi!",
     });

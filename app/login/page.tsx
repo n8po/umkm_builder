@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { getBackendBaseUrl } from "@/lib/backend-url";
 import { toast } from "sonner";
+import { authService } from "@/lib/services";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,39 +48,16 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${backendBaseUrl}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const data = await authService.login({ email, password });
 
-      const data = await response.json();
-
-      if (!response.ok || !data?.access_token) {
+      if (!data?.access_token) {
         setError(data?.detail || "Email atau password salah.");
         return;
       }
 
-      const sessionRes = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token
-        }),
-      });
-
-      if (!sessionRes.ok) {
-        setError("Gagal menyimpan sesi login.");
-        return;
-      }
-
       router.push("/ai-chat");
-    } catch {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } catch (err: any) {
+      setError(err?.detail || err?.message || "Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }

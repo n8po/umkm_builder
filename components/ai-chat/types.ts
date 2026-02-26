@@ -38,3 +38,33 @@ export interface AISettings {
   maxTokens: number;
   systemPrompt: string;
 }
+
+// ============================================================
+// Builder Types — JSON Schema → dnd-kit
+// ============================================================
+
+/** Tipe komponen yang tersedia di builder */
+export type BlockType =
+  | "header"
+  | "hero"
+  | "product"
+  | "menu-grid"
+  | "about"
+  | "location"
+  | "contact"
+  | "gallery"
+  | "testimonial"
+  | "footer";
+
+/** Setiap block/komponen di builder canvas */
+export interface BuilderBlock {
+  id: string;
+  type: BlockType;
+  props: Record<string, unknown>;
+}
+
+/** Response JSON dari Ollama/Qwen yang sudah dinormalisasi */
+export interface BuilderResponse {
+  components: BuilderBlock[];
+}
+
