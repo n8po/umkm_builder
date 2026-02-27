@@ -1,3 +1,18 @@
+/** File yang di-generate AI */
+export interface GeneratedFile {
+  path: string;       // e.g. "components/Header.tsx"
+  content: string;    // source code
+  language: string;   // "tsx" | "ts" | "css" | "html" | "json" | ...
+}
+
+/** Step label untuk animasi generate */
+export type GenerationStep =
+  | "idle"
+  | "analyzing"
+  | "structuring"
+  | "writing"
+  | "done";
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
@@ -9,6 +24,7 @@ export interface ChatMessage {
     editedFiles?: string[];
     addedPackages?: string[];
     model?: string;
+    generatedFiles?: GeneratedFile[];
   };
 }
 
@@ -18,6 +34,9 @@ export interface ChatSession {
   createdAt: number;
   updatedAt: number;
   messages: ChatMessage[];
+  sandboxId?: string;
+  sandboxUrl?: string;
+  generatedFiles?: GeneratedFile[];
 }
 
 export interface SandboxInfo {

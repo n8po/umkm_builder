@@ -5,6 +5,45 @@ import { SandboxProvider, SandboxInfo, CommandResult } from '../types';
 export class VercelProvider extends SandboxProvider {
   private existingFiles: Set<string> = new Set();
 
+  async reconnect(sandboxId: string): Promise<SandboxInfo> {
+    try {
+      if (this.sandbox) {
+        try { await this.sandbox.stop(); } catch (e) {}
+        this.sandbox = null;
+      }
+      this.existingFiles.clear();
+
+      const sandboxConfig: any = { sandboxId };
+      if (process.env.VERCEL_TOKEN && process.env.VERCEL_TEAM_ID && process.env.VERCEL_PROJECT_ID) {
+        sandboxConfig.teamId = process.env.VERCEL_TEAM_ID;
+        sandboxConfig.projectId = process.env.VERCEL_PROJECT_ID;
+        sandboxConfig.token = process.env.VERCEL_TOKEN;
+      } else if (process.env.VERCEL_OIDC_TOKEN) {
+        sandboxConfig.oidcToken = process.env.VERCEL_OIDC_TOKEN;
+      }
+
+      this.sandbox = await Sandbox.get(sandboxConfig);
+      
+      if (this.sandbox.status !== 'running') {
+        throw new Error(`Sandbox is not running (status: ${this.sandbox.status})`);
+      }
+      const sandboxUrl = this.sandbox.domain(5173);
+
+      this.sandboxInfo = {
+        sandboxId,
+        url: sandboxUrl,
+        provider: 'vercel',
+        createdAt: new Date()
+      };
+
+      return this.sandboxInfo;
+    } catch (error) {
+      console.error(`[VercelProvider] Failed to reconnect to sandbox ${sandboxId}:`, error);
+      this.sandbox = null;
+      throw error;
+    }
+  }
+
   async createSandbox(): Promise<SandboxInfo> {
     try {
       
@@ -22,9 +61,8 @@ export class VercelProvider extends SandboxProvider {
       this.existingFiles.clear();
 
       // Create Vercel sandbox
-      
       const sandboxConfig: any = {
-        timeout: 300000, // 5 minutes in ms
+        timeout: 1800000, // 30 minutes in ms
         runtime: 'node22', // Use node22 runtime for Vercel sandboxes
         ports: [5173] // Vite port
       };

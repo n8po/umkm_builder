@@ -4,8 +4,8 @@ import { VercelProvider } from './providers/vercel-provider';
 
 export class SandboxFactory {
   static create(provider?: string, config?: SandboxProviderConfig): SandboxProvider {
-    // Use environment variable if provider not specified
-    const selectedProvider = provider || process.env.SANDBOX_PROVIDER || 'e2b';
+    // Force Vercel provider since we configured it locally with vercel link
+    const selectedProvider = provider || process.env.SANDBOX_PROVIDER || 'vercel';
     
     
     switch (selectedProvider.toLowerCase()) {

@@ -1,15 +1,109 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AlertCircle, Copy, Check, Sparkles } from "lucide-react";
+import { AlertCircle, Copy, Check, Sparkles, FileCode2, FileType2, FileJson, FileText } from "lucide-react";
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import type { ChatMessage } from "./types";
+import type { ChatMessage, GeneratedFile } from "./types";
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
 }
 
+// ── Detect if text is a raw builder JSON response ────────────────
+function isBuilderJson(text: string): boolean {
+  const trimmed = text.trim();
+  // Pure JSON with "components" key
+  if (trimmed.startsWith("{") && trimmed.includes('"components"')) return true;
+  // JSON embedded in text
+  if (/"components"\s*:\s*\[/.test(trimmed)) return true;
+  return false;
+}
+
+// ── Extract component count from builder JSON ────────────────────
+function extractComponentCount(text: string): number {
+  try {
+    const match = text.match(/"components"\s*:\s*\[/);
+    if (!match) return 0;
+    const start = text.indexOf("[", match.index!);
+    let depth = 0;
+    let count = 0;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === "{") {
+        depth++;
+        if (depth === 1) count++;
+      } else if (text[i] === "}") {
+        depth--;
+      } else if (text[i] === "]" && depth === 0) break;
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
+// ── Extract component type names ────────────────────────────────
+function extractComponentTypes(text: string): string[] {
+  const matches = text.matchAll(/"type"\s*:\s*"([^"]+)"/g);
+  return [...matches].map((m) => m[1]).slice(0, 8);
+}
+
+// ── File icon based on extension ────────────────────────────────
+function FileIcon({ path }: { path: string }) {
+  const ext = path.split(".").pop()?.toLowerCase() ?? "";
+  if (["tsx", "ts", "jsx", "js"].includes(ext)) return <FileCode2 className="size-3 shrink-0 text-blue-500" />;
+  if (["css", "scss"].includes(ext)) return <FileType2 className="size-3 shrink-0 text-pink-400" />;
+  if (["json"].includes(ext)) return <FileJson className="size-3 shrink-0 text-orange-400" />;
+  return <FileText className="size-3 shrink-0 text-neutral-400" />;
+}
+
+// ── Build Result Card: shown instead of raw JSON ─────────────────
+function BuildResultCard({ text, files }: { text: string; files?: GeneratedFile[] }) {
+  const count = extractComponentCount(text);
+  const types = extractComponentTypes(text);
+
+  // Use virtual files list or derived from types
+  const fileList: { path: string }[] = files?.length
+    ? files
+    : [
+        { path: "App.tsx" },
+        ...types.map((t) => {
+          const name = t.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
+          return { path: `components/${name}.tsx` };
+        }),
+        { path: "styles.css" },
+      ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mt-2 rounded-xl border border-neutral-100 bg-neutral-50 overflow-hidden text-sm"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 py-2.5 bg-gradient-to-r from-violet-50 to-blue-50 border-b border-neutral-100">
+        <div className="flex size-5 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-blue-500">
+          <Sparkles className="size-3 text-white" />
+        </div>
+        <span className="text-xs font-semibold text-neutral-700">
+          Website dibuat — {count} komponen
+        </span>
+      </div>
+
+      {/* File list */}
+      <div className="px-3 py-2 space-y-1 max-h-40 overflow-y-auto">
+        {fileList.map((f) => (
+          <div key={f.path} className="flex items-center gap-2 py-0.5">
+            <FileIcon path={f.path} />
+            <span className="text-[11px] text-neutral-600 font-mono truncate">{f.path}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Main ChatMessageBubble ────────────────────────────────────────
 export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === "user";
@@ -19,6 +113,9 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [message.content]);
+
+  // Detect if AI response is a raw builder JSON → show card instead
+  const hasBuilderJson = !isUser && !message.isStreaming && isBuilderJson(message.content);
 
   // ═══ User message — right, dark bubble ═══
   if (isUser) {
@@ -46,7 +143,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="flex py-1.5"
     >
-      <div className="flex gap-3 max-w-[85%] group">
+      <div className="flex gap-3 max-w-[92%] group">
         {/* AI Avatar */}
         <div className="shrink-0 mt-1">
           <div
@@ -72,9 +169,8 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
               message.isError ? "text-red-600" : "text-neutral-700"
             )}
           >
-            {message.content ? (
-              <div className="whitespace-pre-wrap">{message.content}</div>
-            ) : message.isStreaming ? (
+            {/* Streaming indicator */}
+            {message.isStreaming && !message.content ? (
               <div className="flex items-center gap-2 py-1">
                 <div className="flex gap-1">
                   <span className="size-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:0ms]" />
@@ -83,11 +179,19 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
                 </div>
                 <span className="text-xs text-neutral-400">Sedang memproses...</span>
               </div>
+            ) : hasBuilderJson ? (
+              // ── Show build result card instead of raw JSON ──
+              <BuildResultCard
+                text={message.content}
+                files={message.metadata?.generatedFiles}
+              />
+            ) : message.content ? (
+              <div className="whitespace-pre-wrap">{message.content}</div>
             ) : null}
           </div>
 
-          {/* Copy button */}
-          {message.content && !message.isStreaming && (
+          {/* Copy button — only for non-JSON messages */}
+          {message.content && !message.isStreaming && !hasBuilderJson && (
             <div className="mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <button
                 onClick={handleCopy}

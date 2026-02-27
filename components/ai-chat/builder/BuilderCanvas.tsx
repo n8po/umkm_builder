@@ -16,14 +16,21 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Monitor, Tablet, Smartphone } from "lucide-react";
+import { Monitor, Tablet, Smartphone, Lock, LockOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BuilderBlock } from "../types";
 import { SortableBlock } from "./SortableBlock";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BuilderCanvasProps {
     blocks: BuilderBlock[];
     onBlocksChange: (blocks: BuilderBlock[]) => void;
+    isLocked?: boolean;
+    onLockToggle?: () => void;
 }
 
 type ViewMode = "desktop" | "tablet" | "mobile";
@@ -31,17 +38,28 @@ type ViewMode = "desktop" | "tablet" | "mobile";
 /**
  * Canvas utama builder.
  * Render semua block dari JSON schema dengan dnd-kit drag-and-drop.
+ * Supports lock mode: disable drag-and-drop and hide block handles.
  */
-export function BuilderCanvas({ blocks, onBlocksChange }: BuilderCanvasProps) {
+export function BuilderCanvas({
+    blocks,
+    onBlocksChange,
+    isLocked = false,
+    onLockToggle,
+}: BuilderCanvasProps) {
     const [viewMode, setViewMode] = useState<ViewMode>("desktop");
 
-    const sensors = useSensors(
+    // When locked, no sensors → drag is disabled
+    const activeSensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
+    const lockedSensors = useSensors(); // empty = no drag
+
+    const sensors = isLocked ? lockedSensors : activeSensors;
 
     const handleDragEnd = useCallback(
         (event: DragEndEvent) => {
+            if (isLocked) return;
             const { active, over } = event;
             if (over && active.id !== over.id) {
                 const oldIndex = blocks.findIndex((b) => b.id === active.id);
@@ -49,14 +67,15 @@ export function BuilderCanvas({ blocks, onBlocksChange }: BuilderCanvasProps) {
                 onBlocksChange(arrayMove(blocks, oldIndex, newIndex));
             }
         },
-        [blocks, onBlocksChange]
+        [blocks, onBlocksChange, isLocked]
     );
 
     const handleDeleteBlock = useCallback(
         (id: string) => {
+            if (isLocked) return;
             onBlocksChange(blocks.filter((b) => b.id !== id));
         },
-        [blocks, onBlocksChange]
+        [blocks, onBlocksChange, isLocked]
     );
 
     const viewModeWidths: Record<ViewMode, string> = {
@@ -74,26 +93,61 @@ export function BuilderCanvas({ blocks, onBlocksChange }: BuilderCanvasProps) {
                     <span className="text-xs text-neutral-400">·</span>
                     <span className="text-xs text-neutral-400">{blocks.length} komponen</span>
                 </div>
-                {/* Device toggles */}
-                <div className="flex items-center bg-neutral-100 rounded-lg p-0.5 gap-0.5">
-                    {([
-                        { mode: "desktop" as const, icon: Monitor, label: "Desktop" },
-                        { mode: "tablet" as const, icon: Tablet, label: "Tablet" },
-                        { mode: "mobile" as const, icon: Smartphone, label: "Mobile" },
-                    ]).map(({ mode, icon: Icon }) => (
-                        <button
-                            key={mode}
-                            onClick={() => setViewMode(mode)}
-                            className={cn(
-                                "flex items-center justify-center size-7 rounded-md transition-all",
-                                viewMode === mode
-                                    ? "bg-white text-neutral-900 shadow-sm"
-                                    : "text-neutral-400 hover:text-neutral-700"
-                            )}
-                        >
-                            <Icon className="size-3.5" />
-                        </button>
-                    ))}
+
+                <div className="flex items-center gap-1.5">
+                    {/* Device toggles */}
+                    <div className="flex items-center bg-neutral-100 rounded-lg p-0.5 gap-0.5">
+                        {([
+                            { mode: "desktop" as const, icon: Monitor, label: "Desktop" },
+                            { mode: "tablet" as const, icon: Tablet, label: "Tablet" },
+                            { mode: "mobile" as const, icon: Smartphone, label: "Mobile" },
+                        ]).map(({ mode, icon: Icon, label }) => (
+                            <Tooltip key={mode}>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        onClick={() => setViewMode(mode)}
+                                        className={cn(
+                                            "flex items-center justify-center size-7 rounded-md transition-all",
+                                            viewMode === mode
+                                                ? "bg-white text-neutral-900 shadow-sm"
+                                                : "text-neutral-400 hover:text-neutral-700"
+                                        )}
+                                    >
+                                        <Icon className="size-3.5" />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent>{label}</TooltipContent>
+                            </Tooltip>
+                        ))}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="w-px h-4 bg-neutral-200" />
+
+                    {/* Lock button */}
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button
+                                onClick={onLockToggle}
+                                className={cn(
+                                    "flex items-center justify-center size-7 rounded-md transition-all",
+                                    isLocked
+                                        ? "bg-amber-100 text-amber-600 shadow-sm"
+                                        : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                                )}
+                                aria-label={isLocked ? "Buka kunci (aktifkan drag)" : "Kunci (nonaktifkan drag)"}
+                            >
+                                {isLocked ? (
+                                    <Lock className="size-3.5" />
+                                ) : (
+                                    <LockOpen className="size-3.5" />
+                                )}
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {isLocked ? "Kunci aktif — klik untuk unlock drag" : "Klik untuk kunci preview"}
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
             </div>
 
@@ -123,12 +177,13 @@ export function BuilderCanvas({ blocks, onBlocksChange }: BuilderCanvasProps) {
                                 items={blocks.map((b) => b.id)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                <div className="pl-10">
+                                <div className={cn(isLocked ? "" : "pl-10")}>
                                     {blocks.map((block) => (
                                         <SortableBlock
                                             key={block.id}
                                             block={block}
                                             onDelete={handleDeleteBlock}
+                                            isLocked={isLocked}
                                         />
                                     ))}
                                 </div>

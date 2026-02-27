@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseMorphEdits, applyMorphEditToFile } from '@/lib/morph-fast-apply';
+import { getComponentTemplate } from './component-templates';
 // Sandbox import not needed - using global sandbox from sandbox-manager
 import type { SandboxState } from '@/types/sandbox';
 import type { ConversationState } from '@/types/conversation';
@@ -59,8 +60,70 @@ function parseAIResponse(response: string): ParsedResponse {
         }
       }
     }
-
+    
     return packages;
+  }
+
+  // Check if response is JSON (from FastAPI JSON Schema mode)
+  try {
+    // Attempt to extract JSON from the string, handling potential markdown blocks
+    const jsonStrMatch = response.match(/```json\n([\s\S]*?)\n```/) || [null, response];
+    const jsonStr = jsonStrMatch[1].trim();
+    
+    // Check if it looks like JSON array or object before parsing
+    if (jsonStr.startsWith('{') || jsonStr.startsWith('[')) {
+      const data = JSON.parse(jsonStr);
+      
+      if (data.components && Array.isArray(data.components)) {
+        console.log(`[apply-ai-code-stream] Detected JSON layout with ${data.components.length} components`);
+        
+        let appContent = `import React from 'react';\nimport './index.css';\n\n`;
+        let renderContent = `\nexport default function App() {\n  return (\n    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">\n`;
+        
+        const componentImports = new Set<string>();
+        
+        data.components.forEach((comp: any) => {
+          const type = comp.type;
+          const CompName = type.charAt(0).toUpperCase() + type.slice(1).replace(/-([a-z])/g, (g: string) => g[1].toUpperCase());
+          componentImports.add(CompName);
+          
+          renderContent += `      <${CompName} {...${JSON.stringify(comp.props)}} />\n`;
+          
+          // Generate a dummy file for this component if it doesn't exist
+          const componentPath = `src/components/${CompName}.jsx`;
+          if (!sections.files.some((f: any) => f.path === componentPath)) {
+             sections.files.push({
+               path: componentPath,
+               content: getComponentTemplate(type, CompName)
+             });
+          }
+        });
+        
+        renderContent += `    </div>\n  );\n}\n`;
+        
+        // Add imports
+        Array.from(componentImports).forEach(CompName => {
+          appContent += `import ${CompName} from './components/${CompName}';\n`;
+        });
+        
+        appContent += renderContent;
+        
+        sections.files.push({
+          path: 'src/App.jsx',
+          content: appContent
+        });
+        
+        sections.files.push({
+          path: 'src/index.css',
+          content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\nbody {\n  margin: 0;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n`
+        });
+        
+        return sections; // Return early, assume this was the whole response
+      }
+    }
+  } catch (e) {
+    // Not valid JSON layout, continue to normal parsing
+    console.log(`[apply-ai-code-stream] Response is not valid JSON layout, trying markdown/xml format...`);
   }
 
   // Parse file sections - handle duplicates and prefer complete versions
@@ -310,6 +373,20 @@ export async function POST(request: NextRequest) {
       provider = global.activeSandboxProvider;
     }
 
+    let recreatedSandboxId = null;
+    let recreatedSandboxUrl = null;
+
+    // Liveness check: if we have an existing provider from cache, ensure it is still running
+    if (provider && provider.getSandboxInfo()?.provider === 'vercel') {
+      try {
+        await provider.reconnect(provider.getSandboxInfo()!.sandboxId);
+      } catch (err) {
+        console.warn(`[apply-ai-code-stream] Existing sandbox ${sandboxId} is dead. Removing from cache...`);
+        if (sandboxId) sandboxManager.removeSandbox(sandboxId);
+        provider = null;
+      }
+    }
+
     // If we have a sandboxId but no provider, try to get or create one
     if (!provider && sandboxId) {
       console.log(`[apply-ai-code-stream] No provider found for sandbox ${sandboxId}, attempting to get or create...`);
@@ -320,9 +397,13 @@ export async function POST(request: NextRequest) {
         // If we got a new provider (not reconnected), we need to create a new sandbox
         if (!provider.getSandboxInfo()) {
           console.log(`[apply-ai-code-stream] Creating new sandbox since reconnection failed for ${sandboxId}`);
-          await provider.createSandbox();
+          const sandboxInfo = await provider.createSandbox();
           await provider.setupViteApp();
-          sandboxManager.registerSandbox(sandboxId, provider);
+          sandboxManager.removeSandbox(sandboxId);
+          sandboxManager.registerSandbox(sandboxInfo.sandboxId, provider);
+          
+          recreatedSandboxId = sandboxInfo.sandboxId;
+          recreatedSandboxUrl = sandboxInfo.url;
         }
 
         // Update legacy global state
@@ -410,6 +491,14 @@ export async function POST(request: NextRequest) {
       };
 
       try {
+        if (recreatedSandboxId && recreatedSandboxUrl) {
+          await sendProgress({
+            type: 'sandbox-recreated',
+            sandboxId: recreatedSandboxId,
+            sandboxUrl: recreatedSandboxUrl
+          });
+        }
+        
         await sendProgress({
           type: 'start',
           message: 'Starting code application...',

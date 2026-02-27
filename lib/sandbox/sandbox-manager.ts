@@ -24,32 +24,15 @@ class SandboxManager {
     }
 
     // Try to reconnect to existing sandbox
-    
     try {
       const provider = SandboxFactory.create();
-      
-      // For E2B provider, try to reconnect
-      if (provider.constructor.name === 'E2BProvider') {
-        // E2B sandboxes can be reconnected using the sandbox ID
-        const reconnected = await (provider as any).reconnect(sandboxId);
-        if (reconnected) {
-          this.sandboxes.set(sandboxId, {
-            sandboxId,
-            provider,
-            createdAt: new Date(),
-            lastAccessed: new Date()
-          });
-          this.activeSandboxId = sandboxId;
-          return provider;
-        }
-      }
-      
-      // For Vercel or if reconnection failed, return the new provider
-      // The caller will need to handle creating a new sandbox
+      await provider.reconnect(sandboxId);
+      this.registerSandbox(sandboxId, provider);
       return provider;
     } catch (error) {
       console.error(`[SandboxManager] Error reconnecting to sandbox ${sandboxId}:`, error);
-      throw error;
+      // Return a NEW, unconnected provider. The caller MUST call createSandbox on it.
+      return SandboxFactory.create();
     }
   }
 
@@ -93,6 +76,16 @@ class SandboxManager {
       return sandbox.provider;
     }
     return null;
+  }
+
+  /**
+   * Remove a sandbox from memory
+   */
+  removeSandbox(sandboxId: string): void {
+    this.sandboxes.delete(sandboxId);
+    if (this.activeSandboxId === sandboxId) {
+      this.activeSandboxId = null;
+    }
   }
 
   /**

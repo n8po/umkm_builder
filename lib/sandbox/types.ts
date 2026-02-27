@@ -42,6 +42,7 @@ export abstract class SandboxProvider {
   }
 
   abstract createSandbox(): Promise<SandboxInfo>;
+  abstract reconnect(sandboxId: string): Promise<SandboxInfo>;
   abstract runCommand(command: string): Promise<CommandResult>;
   abstract writeFile(path: string, content: string): Promise<void>;
   abstract readFile(path: string): Promise<string>;

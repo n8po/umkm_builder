@@ -9,19 +9,8 @@ export class E2BProvider extends SandboxProvider {
   /**
    * Attempt to reconnect to an existing E2B sandbox
    */
-  async reconnect(sandboxId: string): Promise<boolean> {
-    try {
-      
-      // Try to connect to existing sandbox
-      // Note: E2B SDK doesn't directly support reconnection, but we can try to recreate
-      // For now, return false to indicate reconnection isn't supported
-      // In the future, E2B may add this capability
-      
-      return false;
-    } catch (error) {
-      console.error(`[E2BProvider] Failed to reconnect to sandbox ${sandboxId}:`, error);
-      return false;
-    }
+  async reconnect(sandboxId: string): Promise<SandboxInfo> {
+    throw new Error('E2BProvider does not support reconnection yet');
   }
 
   async createSandbox(): Promise<SandboxInfo> {
