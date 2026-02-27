@@ -104,10 +104,10 @@ function DragHandle({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => voi
   return (
     <div
       onMouseDown={onMouseDown}
-      className="w-1 shrink-0 bg-neutral-800 hover:bg-violet-500/50 cursor-col-resize transition-colors group"
+      className="w-[1px] shrink-0 bg-neutral-200 dark:bg-neutral-800 hover:w-[4px] hover:bg-neutral-300 dark:hover:bg-violet-500/50 cursor-col-resize transition-all group z-10"
     >
-      <div className="h-full flex items-center justify-center">
-        <div className="w-0.5 h-8 rounded-full bg-neutral-700 group-hover:bg-violet-400 transition-colors" />
+      <div className="h-full flex items-center justify-center -ml-1.5 w-4 pointer-events-none">
+        {/* Invisible hit area to make dragging easier */}
       </div>
     </div>
   );
@@ -157,7 +157,8 @@ export function AIChatWorkspace() {
   const sandbox = useSandbox();
 
   // ── Panels visible when content or generating ──
-  const hasContent = generatedFiles.length > 0 || sandbox.sandboxUrl !== null || isGenerating;
+  const isBuildingMode = chatMode === "build";
+  const hasContent = generatedFiles.length > 0 || sandbox.sandboxUrl !== null || (isGenerating && isBuildingMode);
 
   // ── Currently viewed file (from code viewer) ──
   const viewedFile = generatedFiles.find((f) => f.path === selectedFile) ?? null;
@@ -302,6 +303,8 @@ export function AIChatWorkspace() {
   const handleAskMessage = useCallback(
     async (content: string) => {
       if (!content.trim() || isGenerating) return;
+
+      abortControllerRef.current = new AbortController();
       setIsGenerating(true);
 
       const userMsg: ChatMessage = {
@@ -323,32 +326,80 @@ export function AIChatWorkspace() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: content.trim() }),
+          signal: abortControllerRef.current.signal,
         });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || errData.detail || `HTTP ${res.status}`);
+          throw new Error(errData.error || `HTTP error ${res.status}`);
         }
 
-        const data = await res.json();
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId
-              ? { ...m, content: data.response || "Tidak ada jawaban.", isStreaming: false }
-              : m
-          )
-        );
-      } catch (err) {
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        if (!reader) {
+          throw new Error("No response body stream");
+        }
+
+        let fullText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6);
+              if (data.startsWith("[ERROR]")) {
+                throw new Error(data.slice(7));
+              }
+              
+              try {
+                // Gunakan JSON parse agar karakter newline (\n) di-decode dengan benar
+                const parsed = JSON.parse(data);
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+                fullText += parsed.text || "";
+              } catch (e) {
+                // Fallback untuk response lama
+                if (data === "[DONE]") continue;
+                // Hanya append teks kasar jika bukan JSON error
+                if (!(e instanceof SyntaxError)) {
+                    fullText += data;
+                }
+              }
+
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantId ? { ...m, content: fullText, isStreaming: false } : m
+                )
+              );
+            }
+          }
+        }
+
+      } catch (err: any) {
         const msg = err instanceof Error ? err.message : "Unknown error";
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantId
-              ? { ...m, content: `Terjadi kesalahan: ${msg}`, isStreaming: false, isError: true }
-              : m
-          )
-        );
+        if (err.name === "AbortError") {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, content: m.content + " [Dibatalkan]", isStreaming: false } : m
+            )
+          );
+        } else {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, content: `Error: ${msg}`, isStreaming: false, isError: true } : m
+            )
+          );
+        }
       } finally {
         setIsGenerating(false);
+        abortControllerRef.current = null;
       }
     },
     [isGenerating]
@@ -432,8 +483,8 @@ export function AIChatWorkspace() {
   // ─────────────────────────────────────────────────
   if (authGate === "open") {
     return (
-      <div className="flex h-dvh w-dvw items-center justify-center bg-neutral-950">
-        <div className="relative w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-900 p-8 shadow-2xl">
+      <div className="flex h-dvh w-dvw items-center justify-center bg-white dark:bg-neutral-950">
+        <div className="relative w-full max-w-sm rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8 shadow-xl dark:shadow-2xl">
           <button
             onClick={() => setAuthGate("idle")}
             className="absolute right-4 top-4 p-1.5 rounded-lg text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors"
@@ -443,8 +494,8 @@ export function AIChatWorkspace() {
           <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 mb-5">
             <Sparkles className="size-6 text-white" />
           </div>
-          <h2 className="text-lg font-bold text-white mb-1">Masuk untuk melanjutkan</h2>
-          <p className="text-sm text-neutral-400 mb-6">
+          <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-1">Masuk untuk melanjutkan</h2>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
             Buat akun gratis atau masuk untuk mulai membangun website dengan AI.
           </p>
           <div className="flex flex-col gap-3">
@@ -457,7 +508,7 @@ export function AIChatWorkspace() {
             </button>
             <button
               onClick={() => router.push("/login")}
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border border-neutral-700 text-neutral-200 hover:bg-neutral-800 transition-colors"
+              className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors font-medium"
             >
               <LogIn className="size-4" />
               Masuk
@@ -470,8 +521,8 @@ export function AIChatWorkspace() {
 
   if (authGate === "checking") {
     return (
-      <div className="flex h-dvh w-dvw items-center justify-center bg-neutral-950">
-        <Loader2 className="size-6 text-violet-400 animate-spin" />
+      <div className="flex h-dvh w-dvw items-center justify-center bg-white dark:bg-neutral-950">
+        <Loader2 className="size-6 text-neutral-400 dark:text-violet-400 animate-spin" />
       </div>
     );
   }
@@ -481,10 +532,10 @@ export function AIChatWorkspace() {
   // ─────────────────────────────────────────────────
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex h-dvh w-dvw overflow-hidden bg-neutral-950">
+      <div className="flex h-dvh w-dvw overflow-hidden bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-white">
         {/* Sidebar */}
         {showSidebar && (
-          <div className="shrink-0 border-r border-neutral-800">
+          <div className="shrink-0 border-r border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950">
             <ChatSidebar
               open={showSidebar}
               onToggle={() => setShowSidebar((v) => !v)}
@@ -571,10 +622,10 @@ export function AIChatWorkspace() {
               {/* Panel 2: Files / Palette tab switcher */}
               <div
                 style={{ width: middlePanel.width }}
-                className="flex flex-col shrink-0 h-full border-l border-neutral-800"
+                className="flex flex-col shrink-0 h-full border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950"
               >
                 {/* Tab header */}
-                <div className="flex items-center border-b border-neutral-800 shrink-0 bg-neutral-950">
+                <div className="flex items-center border-b border-neutral-200 dark:border-neutral-800 shrink-0 bg-neutral-50 dark:bg-neutral-950">
                   <button
                     onClick={() => setMiddleTab("files")}
                     className={cn(
@@ -618,9 +669,9 @@ export function AIChatWorkspace() {
               <DragHandle onMouseDown={middlePanel.onMouseDown} />
 
               {/* Panel 3: Preview / Code viewer */}
-              <div className="flex flex-col flex-1 min-w-0 h-full">
+              <div className="flex flex-col flex-1 min-w-0 h-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Toolbar */}
-                <div className="flex items-center gap-2 px-3 py-1.5 border-b border-neutral-800 shrink-0 bg-neutral-950">
+                <div className="flex items-center gap-2 px-3 py-1.5 border-b border-neutral-200 dark:border-neutral-800 shrink-0 bg-white dark:bg-neutral-950 shadow-sm dark:shadow-none">
                   {selectedFile && (
                     <span className="text-[10px] text-neutral-500 font-mono truncate max-w-[140px]">
                       {selectedFile.split("/").pop()}
@@ -641,8 +692,8 @@ export function AIChatWorkspace() {
                         className={cn(
                           "p-1.5 rounded-md transition-colors",
                           device === d
-                            ? "bg-neutral-700 text-white"
-                            : "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800"
+                            ? "bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm dark:shadow-none border border-neutral-200/60 dark:border-transparent"
+                            : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
                         )}
                       >
                         <Icon className="size-3.5" />
@@ -682,7 +733,7 @@ export function AIChatWorkspace() {
                         setSelectedFile(null);
                         setMessages([]);
                       }}
-                      className="p-1.5 rounded-md text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 transition-colors"
+                      className="p-1.5 rounded-md text-neutral-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                       title="Reset sandbox"
                     >
                       <RotateCcw className="size-3.5" />
@@ -703,7 +754,7 @@ export function AIChatWorkspace() {
 
                 {/* Body */}
                 <div className="flex-1 min-h-0 relative overflow-hidden">
-                  <GenerationProgress isGenerating={isGenerating || sandbox.isCreating} />
+                  <GenerationProgress isGenerating={(isGenerating && isBuildingMode) || sandbox.isCreating} />
 
                   {selectedFile && viewedFile?.content ? (
                     <CodeViewerPanel
@@ -712,9 +763,9 @@ export function AIChatWorkspace() {
                       className="h-full"
                     />
                   ) : sandbox.sandboxUrl ? (
-                    <div className="h-full w-full flex items-center justify-center bg-neutral-800">
+                    <div className="h-full w-full flex items-center justify-center bg-neutral-100/50 dark:bg-neutral-800 pattern-dots pattern-neutral-200 dark:pattern-neutral-700 pattern-size-4 pattern-opacity-100 dark:pattern-opacity-20">
                       <div
-                        className="h-full overflow-hidden transition-all duration-300 bg-white"
+                        className="h-full overflow-hidden transition-all duration-300 bg-white ring-1 ring-neutral-200 shadow-sm dark:bg-neutral-900 dark:ring-neutral-800 dark:shadow-2xl"
                         style={{ width: DEVICE_WIDTHS[device] }}
                       >
                         <iframe
@@ -742,7 +793,7 @@ export function AIChatWorkspace() {
       {/* DnD drag overlay */}
       <DragOverlay>
         {draggingId && (
-          <div className="px-3 py-2 rounded-lg bg-violet-600 text-white text-xs font-semibold shadow-xl opacity-90">
+          <div className="px-3 py-2 rounded-lg bg-neutral-900 dark:bg-violet-600 text-white text-xs font-semibold shadow-xl opacity-90 border border-neutral-800 dark:border-transparent">
             + {draggingId}
           </div>
         )}

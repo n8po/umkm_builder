@@ -47,14 +47,14 @@ export function ChatPanel({
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
       {/* Top bar */}
       <div className="flex items-center justify-between h-12 px-4 shrink-0">
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onToggleSidebar}
-          className="text-neutral-300 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg"
+          className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded-lg"
         >
           {sidebarOpen ? (
             <PanelLeftClose className="size-4" />
@@ -64,12 +64,12 @@ export function ChatPanel({
         </Button>
 
         {isGenerating && (
-          <div className="flex items-center gap-2 px-3 py-1 bg-violet-50 rounded-full">
+          <div className="flex items-center gap-2 px-3 py-1 bg-violet-50 dark:bg-violet-500/10 rounded-full border border-violet-100 dark:border-violet-500/20">
             <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-violet-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 dark:bg-violet-500 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-violet-500 dark:bg-violet-400" />
             </span>
-            <span className="text-[11px] font-medium text-violet-600">Generating...</span>
+            <span className="text-[11px] font-medium text-violet-600 dark:text-violet-400">Generating...</span>
           </div>
         )}
       </div>

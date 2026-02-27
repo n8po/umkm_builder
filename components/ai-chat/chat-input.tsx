@@ -69,8 +69,8 @@ export function ChatInput({
           className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border",
             chatMode === "build"
-              ? "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100"
-              : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+              ? "bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-500/20 hover:bg-violet-100 dark:hover:bg-violet-500/20"
+              : "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 hover:bg-blue-100 dark:hover:bg-blue-500/20"
           )}
         >
           {chatMode === "build" ? (
@@ -85,7 +85,7 @@ export function ChatInput({
             </>
           )}
         </button>
-        <span className="text-[10px] text-neutral-400">
+        <span className="text-[10px] text-neutral-400 dark:text-neutral-500">
           {chatMode === "build"
             ? "Prompt akan membuat/edit website"
             : "Prompt akan dijawab sebagai chat biasa"}
@@ -93,9 +93,9 @@ export function ChatInput({
       </div>
 
       {/* Input bar */}
-      <div className="flex items-end gap-2 rounded-2xl border border-neutral-200 bg-neutral-50/50 px-3 py-2 transition-all focus-within:border-neutral-300 focus-within:bg-white focus-within:shadow-sm">
+      <div className="flex items-end gap-2 rounded-2xl border border-neutral-200 dark:border-white/10 bg-neutral-50/50 dark:bg-white/5 px-3 py-2 transition-all focus-within:border-neutral-300 dark:focus-within:border-white/20 focus-within:bg-white dark:focus-within:bg-white/10 focus-within:shadow-sm">
         {/* Plus button */}
-        <button className="flex items-center justify-center size-8 shrink-0 rounded-full text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors mb-0.5">
+        <button className="flex items-center justify-center size-8 shrink-0 rounded-full text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors mb-0.5">
           <Plus className="size-4" />
         </button>
 
@@ -108,13 +108,13 @@ export function ChatInput({
           onInput={handleInput}
           placeholder={chatMode === "build" ? "Deskripsikan website yang ingin dibuat..." : "Tanyakan sesuatu tentang kodingan..."}
           rows={1}
-          className="flex-1 resize-none bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 outline-none min-h-[32px] max-h-[200px] py-1.5"
+          className="flex-1 resize-none bg-transparent text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 outline-none min-h-[32px] max-h-[200px] py-1.5"
         />
 
         {/* Right buttons */}
         <div className="flex items-center gap-1 shrink-0 mb-0.5">
           {/* Voice / Mic button */}
-          <button className="flex items-center justify-center size-8 rounded-full text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors">
+          <button className="flex items-center justify-center size-8 rounded-full text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors">
             <AudioLines className="size-4" />
           </button>
 
@@ -125,8 +125,8 @@ export function ChatInput({
               className={cn(
                 "flex items-center justify-center size-8 rounded-full transition-all duration-200",
                 isGenerating
-                  ? "bg-red-100 text-red-500 hover:bg-red-200"
-                  : "bg-neutral-900 text-white hover:bg-neutral-800"
+                  ? "bg-red-100 dark:bg-red-500/20 text-red-500 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30"
+                  : "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200"
               )}
             >
               {isGenerating ? (

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
 
-    const response = await fetch(`${backendUrl}/api/chat/generate`, {
+    const response = await fetch(`${backendUrl}/api/chat/ask`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,8 +40,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(errData, { status: response.status });
     }
 
-    const data = await response.json();
-    return NextResponse.json({ response: data.response || "" });
+    // Teruskan stream SSE dari FastAPI langsung ke client
+    return new NextResponse(response.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
 
   } catch (error) {
     console.error('[chat-ask] Error:', error);

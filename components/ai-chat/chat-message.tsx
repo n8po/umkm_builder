@@ -5,6 +5,8 @@ import { AlertCircle, Copy, Check, Sparkles, FileCode2, FileType2, FileJson, Fil
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import type { ChatMessage, GeneratedFile } from "./types";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
@@ -128,7 +130,11 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
       >
         <div className="max-w-[80%]">
           <div className="rounded-2xl rounded-br-md px-4 py-3 bg-neutral-900 text-white text-sm leading-relaxed shadow-sm">
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <div className="prose prose-sm prose-invert max-w-none break-words leading-relaxed [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_li]:my-0.5 [&_pre]:my-2 [&_pre]:p-3 [&_pre]:bg-neutral-800 [&_pre]:text-neutral-100 [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded-sm [&_code]:text-xs">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message.content}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -186,7 +192,11 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
                 files={message.metadata?.generatedFiles}
               />
             ) : message.content ? (
-              <div className="whitespace-pre-wrap">{message.content}</div>
+              <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none break-words leading-relaxed [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_li]:my-0.5 [&_pre]:my-2 [&_pre]:p-3 [&_pre]:bg-neutral-800 [&_pre]:text-neutral-100 [&_code]:bg-neutral-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded-sm [&_code]:text-xs">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {message.content}
+                </ReactMarkdown>
+              </div>
             ) : null}
           </div>
 
