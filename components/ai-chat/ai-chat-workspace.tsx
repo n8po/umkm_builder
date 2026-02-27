@@ -39,9 +39,10 @@ import {
   RefreshCw,
   RotateCcw,
   Loader2,
+  Download,
 } from "lucide-react";
 
-import type { ChatMessage, ChatSession, AISettings, GeneratedFile } from "./types";
+import type { ChatMessage, ChatSession, AISettings, GeneratedFile, ChatMode } from "./types";
 
 // ─────────────────────────────────────────────────
 // Constants
@@ -125,6 +126,7 @@ export function AIChatWorkspace() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [aiSettings, setAiSettings] = useState<AISettings>(DEFAULT_SETTINGS);
+  const [chatMode, setChatMode] = useState<ChatMode>("build");
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // ── Auth gate ───────────────────────────────────
@@ -294,6 +296,110 @@ export function AIChatWorkspace() {
     setIsGenerating(false);
   }, []);
 
+  // ─────────────────────────────────────────────────
+  // Ask mode handler (text-only Q&A, no sandbox)
+  // ─────────────────────────────────────────────────
+  const handleAskMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim() || isGenerating) return;
+      setIsGenerating(true);
+
+      const userMsg: ChatMessage = {
+        id: nanoid(),
+        role: "user",
+        content: content.trim(),
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, userMsg]);
+
+      const assistantId = nanoid();
+      setMessages((prev) => [
+        ...prev,
+        { id: assistantId, role: "assistant", content: "", timestamp: Date.now(), isStreaming: true },
+      ]);
+
+      try {
+        const res = await fetch("/api/chat-ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: content.trim() }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || errData.detail || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: data.response || "Tidak ada jawaban.", isStreaming: false }
+              : m
+          )
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? { ...m, content: `Terjadi kesalahan: ${msg}`, isStreaming: false, isError: true }
+              : m
+          )
+        );
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [isGenerating]
+  );
+
+  // ─────────────────────────────────────────────────
+  // Unified send handler (routes to build or ask)
+  // ─────────────────────────────────────────────────
+  const handleUnifiedSend = useCallback(
+    (content: string) => {
+      if (chatMode === "ask") {
+        handleAskMessage(content);
+      } else {
+        handleSendMessage(content);
+      }
+    },
+    [chatMode, handleAskMessage, handleSendMessage]
+  );
+
+  // ─────────────────────────────────────────────────
+  // Toggle chat mode
+  // ─────────────────────────────────────────────────
+  const handleToggleMode = useCallback(() => {
+    setChatMode((prev) => (prev === "build" ? "ask" : "build"));
+  }, []);
+
+  // ─────────────────────────────────────────────────
+  // Download ZIP
+  // ─────────────────────────────────────────────────
+  const handleDownloadZip = useCallback(async () => {
+    if (generatedFiles.length === 0) return;
+
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+
+    for (const file of generatedFiles) {
+      zip.file(file.path, file.content);
+    }
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "umkm-website.zip";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [generatedFiles]);
+
+
   // ── Palette insert ──────────────────────────────
   const handleInsertComponent = useCallback((prompt: string) => {
     setPendingPrompt(prompt);
@@ -432,10 +538,12 @@ export function AIChatWorkspace() {
               <ChatPanel
                 messages={messages}
                 isGenerating={isGenerating}
-                onSendMessage={handleSendMessage}
+                onSendMessage={handleUnifiedSend}
                 onStopGeneration={handleStop}
                 sidebarOpen={showSidebar}
                 onToggleSidebar={() => setShowSidebar((v) => !v)}
+                chatMode={chatMode}
+                onToggleMode={handleToggleMode}
               />
             </div>
           ) : (
@@ -449,10 +557,12 @@ export function AIChatWorkspace() {
                 <ChatPanel
                   messages={messages}
                   isGenerating={isGenerating}
-                  onSendMessage={handleSendMessage}
+                  onSendMessage={handleUnifiedSend}
                   onStopGeneration={handleStop}
                   sidebarOpen={showSidebar}
                   onToggleSidebar={() => setShowSidebar((v) => !v)}
+                  chatMode={chatMode}
+                  onToggleMode={handleToggleMode}
                 />
               </div>
 
@@ -577,6 +687,17 @@ export function AIChatWorkspace() {
                     >
                       <RotateCcw className="size-3.5" />
                     </button>
+
+                    {/* Download ZIP */}
+                    {generatedFiles.length > 0 && (
+                      <button
+                        onClick={handleDownloadZip}
+                        className="p-1.5 rounded-md text-neutral-500 hover:text-emerald-400 hover:bg-neutral-800 transition-colors"
+                        title="Download ZIP"
+                      >
+                        <Download className="size-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
 

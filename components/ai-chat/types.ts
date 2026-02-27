@@ -5,6 +5,9 @@ export interface GeneratedFile {
   language: string;   // "tsx" | "ts" | "css" | "html" | "json" | ...
 }
 
+/** Mode chat: build website atau tanya-jawab */
+export type ChatMode = "build" | "ask";
+
 /** Step label untuk animasi generate */
 export type GenerationStep =
   | "idle"

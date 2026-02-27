@@ -7,7 +7,7 @@ import { WelcomeScreen } from "./welcome-screen";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
-import type { ChatMessage } from "./types";
+import type { ChatMessage, ChatMode } from "./types";
 
 interface ChatPanelProps {
   messages: ChatMessage[];
@@ -16,6 +16,8 @@ interface ChatPanelProps {
   onStopGeneration: () => void;
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
+  chatMode: ChatMode;
+  onToggleMode: () => void;
 }
 
 export function ChatPanel({
@@ -25,6 +27,8 @@ export function ChatPanel({
   onStopGeneration,
   sidebarOpen,
   onToggleSidebar,
+  chatMode,
+  onToggleMode,
 }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -92,6 +96,8 @@ export function ChatPanel({
             onSendMessage={onSendMessage}
             onStopGeneration={onStopGeneration}
             isGenerating={isGenerating}
+            chatMode={chatMode}
+            onToggleMode={onToggleMode}
           />
         </div>
       </div>
