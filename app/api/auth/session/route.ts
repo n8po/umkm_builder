@@ -87,13 +87,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(
-    {
-      authenticated: true,
-      user: {
-        id: payload.sub ?? null,
-        email: payload.email ?? null,
-      },
-    },
+    { authenticated: true },
     { status: 200 }
   );
 }
@@ -122,17 +116,8 @@ async function tryRefresh(refreshToken: string): Promise<NextResponse> {
     const newAccessToken: string = data.access_token;
     const newRefreshToken: string = data.refresh_token;
 
-    // Decode payload dari access token baru
-    const payload = decodeJwtPayload(newAccessToken);
-
     const response = NextResponse.json(
-      {
-        authenticated: true,
-        user: {
-          id: payload?.sub ?? null,
-          email: payload?.email ?? null,
-        },
-      },
+      { authenticated: true },
       { status: 200 }
     );
 

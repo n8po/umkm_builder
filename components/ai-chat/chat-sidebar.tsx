@@ -23,7 +23,7 @@ import type { ChatSession, AISettings } from "./types";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { authService } from "@/lib/services";
-import type { SessionUser } from "@/lib/repositories";
+import type { UserProfile } from "@/lib/repositories";
 
 
 interface ChatSidebarProps {
@@ -48,13 +48,18 @@ export function ChatSidebar({
   onAiSettingsChange,
 }: ChatSidebarProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const loadSession = async () => {
       const session = await authService.getSession();
-      setUser(session?.authenticated ? (session.user ?? null) : null);
+      if (session?.authenticated) {
+        const profile = await authService.getMe();
+        setUser(profile);
+      } else {
+        setUser(null);
+      }
     };
     void loadSession();
   }, []);
@@ -65,7 +70,7 @@ export function ChatSidebar({
     window.location.href = "/";
   };
 
-  const getInitials = (u: SessionUser) => {
+  const getInitials = (u: UserProfile) => {
     const name = u.email || "";
     return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
   };
@@ -131,8 +136,8 @@ export function ChatSidebar({
                     <span className={cn(
                       "size-2 rounded-full shrink-0",
                       session.id === activeSessionId ? "bg-neutral-900 dark:bg-[#a29bfe]" : "bg-neutral-300 dark:bg-white/20"
-                      )} />
-                      <span className="text-[13px] truncate font-medium">{session.title}</span>
+                    )} />
+                    <span className="text-[13px] truncate font-medium">{session.title}</span>
                   </div>
                 </button>
               ))}
@@ -183,30 +188,30 @@ export function ChatSidebar({
           {/* Theme toggle & Settings */}
           <div className="flex items-center gap-2">
             <div className="flex-1 flex items-center rounded-xl bg-neutral-200/50 dark:bg-white/[0.04] p-1 border border-neutral-200/50 dark:border-transparent">
-            <button
-              onClick={() => setTheme("light")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition-colors border",
-                theme !== "dark"
-                  ? "bg-white shadow-sm text-neutral-900 border-neutral-200/50"
-                  : "border-transparent text-white/30 hover:text-white/50"
-              )}
-            >
-              <Sun className="size-3" />
-              Light
-            </button>
-            <button
-              onClick={() => setTheme("dark")}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition-colors border",
-                theme === "dark"
-                  ? "bg-white/10 text-white border-transparent"
-                  : "text-neutral-500 hover:text-neutral-900 border-transparent"
-              )}
-            >
-              <Moon className="size-3" />
-              Dark
-            </button>
+              <button
+                onClick={() => setTheme("light")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition-colors border",
+                  theme !== "dark"
+                    ? "bg-white shadow-sm text-neutral-900 border-neutral-200/50"
+                    : "border-transparent text-white/30 hover:text-white/50"
+                )}
+              >
+                <Sun className="size-3" />
+                Light
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition-colors border",
+                  theme === "dark"
+                    ? "bg-white/10 text-white border-transparent"
+                    : "text-neutral-500 hover:text-neutral-900 border-transparent"
+                )}
+              >
+                <Moon className="size-3" />
+                Dark
+              </button>
             </div>
             <button
               onClick={() => setSettingsOpen(true)}

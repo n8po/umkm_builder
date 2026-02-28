@@ -17,14 +17,14 @@ import { Check, Loader2, Thermometer, Hash, FileText, User, CreditCard, Activity
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { AISettings } from "./types";
-import type { SessionUser } from "@/lib/repositories";
+import type { UserProfile } from "@/lib/repositories";
 
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   settings: AISettings;
   onSave: (settings: AISettings) => void;
-  user: SessionUser | null;
+  user: UserProfile | null;
 }
 
 export function SettingsDialog({
@@ -88,36 +88,36 @@ export function SettingsDialog({
       <DialogContent className="bg-white dark:bg-neutral-900 border text-neutral-900 dark:text-neutral-100 border-neutral-200 dark:border-white/10 shadow-xl dark:shadow-2xl sm:max-w-2xl p-0 gap-0 overflow-hidden">
         <DialogTitle className="sr-only">Pengaturan AI</DialogTitle>
         <DialogDescription className="sr-only">Kustomisasi profil, prompt sistem, dan penagihan AI Chat.</DialogDescription>
-        
+
         <div className="flex h-[500px]">
           {/* Left Sidebar Tabs */}
           <div className="w-[200px] border-r border-neutral-100 dark:border-white/5 bg-neutral-50/50 dark:bg-neutral-950/50 p-4 shrink-0">
             <h2 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4 px-2">Settings</h2>
             <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
               <TabsList className="flex flex-col h-auto bg-transparent p-0 gap-1 items-start w-full">
-                <TabsTrigger 
-                  value="profil" 
+                <TabsTrigger
+                  value="profil"
                   className="w-full justify-start gap-2.5 px-3 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-neutral-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-neutral-200 dark:data-[state=active]:border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
                 >
                   <User className="size-4" />
                   Profil
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="prompt" 
+                <TabsTrigger
+                  value="prompt"
                   className="w-full justify-start gap-2.5 px-3 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-neutral-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-neutral-200 dark:data-[state=active]:border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
                 >
                   <Sparkles className="size-4" />
                   Prompt Sistem
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="billing" 
+                <TabsTrigger
+                  value="billing"
                   className="w-full justify-start gap-2.5 px-3 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-neutral-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-neutral-200 dark:data-[state=active]:border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
                 >
                   <CreditCard className="size-4" />
                   Penagihan
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="usage" 
+                <TabsTrigger
+                  value="usage"
                   className="w-full justify-start gap-2.5 px-3 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-neutral-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-neutral-200 dark:data-[state=active]:border-transparent text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
                 >
                   <Activity className="size-4" />
@@ -130,7 +130,7 @@ export function SettingsDialog({
           {/* Right Content Area */}
           <div className="flex-1 flex flex-col bg-white dark:bg-neutral-900">
             <div className="flex-1 overflow-y-auto p-6">
-              
+
               {/* TAB 1: PROFIL */}
               {activeTab === "profil" && (
                 <div className="space-y-6 animate-in fade-in duration-300">
@@ -138,7 +138,7 @@ export function SettingsDialog({
                     <h3 className="text-lg font-semibold text-neutral-900 dark:text-white tracking-tight">Data Diri</h3>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Informasi utama mengenai akun Anda.</p>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="grid gap-2">
                       <Label className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Email Address</Label>
@@ -152,7 +152,7 @@ export function SettingsDialog({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="grid gap-2">
                       <Label className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Status Langganan</Label>
                       <div className="flex items-center justify-between p-4 rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5">
@@ -287,11 +287,11 @@ export function SettingsDialog({
                         </div>
                         <span className="text-sm font-semibold text-neutral-900 dark:text-white">∞ / ∞</span>
                       </div>
-                      
+
                       <div className="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-2 overflow-hidden">
                         <div className="bg-neutral-900 dark:bg-white h-2 rounded-full" style={{ width: '15%' }}></div>
                       </div>
-                      
+
                       <p className="text-xs text-neutral-500 dark:text-neutral-400">
                         (Demo Mode) Batasan token dinonaktifkan untuk pengujian.
                       </p>
@@ -320,7 +320,7 @@ export function SettingsDialog({
                   Pengaturan disimpan
                 </div>
               ) : null}
-              
+
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}

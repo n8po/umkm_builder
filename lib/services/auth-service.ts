@@ -7,7 +7,7 @@
  * UI (Controller) memanggil Service.
  */
 
-import { authRepository, type AuthResponse, type SessionData, type ForgotPasswordResponse } from "../repositories";
+import { authRepository, type AuthResponse, type SessionData, type UserProfile, type ForgotPasswordResponse } from "../repositories";
 
 /**
  * Penjelasan awam:
@@ -26,6 +26,13 @@ export const authService = {
      */
     async getSession(): Promise<SessionData> {
         return await authRepository.getSession();
+    },
+
+    /**
+     * Ambil data profil user (id, email).
+     */
+    async getMe(): Promise<UserProfile | null> {
+        return await authRepository.getMe();
     },
 
     /**

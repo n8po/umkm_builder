@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/avatar";
 
 import { authService } from "@/lib/services";
-import type { SessionUser } from "@/lib/repositories";
+import type { UserProfile } from "@/lib/repositories";
 
 const useCasesItems = [
   { label: "AI Web Builder", href: "/ai-chat", icon: Sparkles },
@@ -212,7 +212,7 @@ function UseCasesMegaMenu({
 }
 
 // Helper: ambil inisial dari nama/email
-function getInitials(user: SessionUser): string {
+function getInitials(user: UserProfile): string {
   const name = user.email || "";
   return name
     .split(" ")
@@ -226,15 +226,20 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [useCasesOpen, setUseCasesOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [user, setUser] = useState<SessionUser | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const headerVisible = useHeaderVisibility();
 
-  // Cek status login saat mount
+  // Cek status login, lalu ambil data user jika sudah login
   useEffect(() => {
     const loadSession = async () => {
       const session = await authService.getSession();
-      setUser(session?.authenticated ? (session.user ?? null) : null);
+      if (session?.authenticated) {
+        const profile = await authService.getMe();
+        setUser(profile);
+      } else {
+        setUser(null);
+      }
     };
 
     void loadSession();

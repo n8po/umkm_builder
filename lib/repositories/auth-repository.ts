@@ -12,14 +12,21 @@ import { getBackendBaseUrl } from "../backend-url";
 
 // ── Types ──────────────────────────────────────────────────
 
-export interface SessionUser {
-    id?: string | null;
-    email?: string | null;
-}
-
+/**
+ * SessionData — hanya status login, TANPA data pribadi.
+ * Kenapa? Agar endpoint session check ringan dan tidak expose email.
+ */
 export interface SessionData {
     authenticated: boolean;
-    user?: SessionUser;
+}
+
+/**
+ * UserProfile — data user yang di-fetch dari /api/auth/me.
+ * Hanya di-request saat UI benar-benar perlu tampilkan nama/email.
+ */
+export interface UserProfile {
+    id: string | null;
+    email: string | null;
 }
 
 interface SaveSessionPayload {
@@ -58,7 +65,7 @@ export interface ForgotPasswordResponse {
 export const authRepository = {
     /**
      * Cek status login user saat ini.
-     * Return { authenticated: true, user: {...} } jika sudah login.
+     * Return { authenticated: true/false } — TANPA data user.
      */
     async getSession(): Promise<SessionData> {
         try {
@@ -67,6 +74,21 @@ export const authRepository = {
             });
         } catch {
             return { authenticated: false };
+        }
+    },
+
+    /**
+     * Ambil data profil user (id, email).
+     * Dipanggil HANYA saat UI butuh menampilkan data user.
+     * Return null jika tidak login atau token expired.
+     */
+    async getMe(): Promise<UserProfile | null> {
+        try {
+            return await apiClient<UserProfile>("/api/auth/me", {
+                cache: "no-store",
+            });
+        } catch {
+            return null;
         }
     },
 
