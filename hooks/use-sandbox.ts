@@ -135,9 +135,14 @@ export function useSandbox() {
                 if (data.type === "file-complete") {
                   const path = data.fileName as string;
                   const lang = path.split(".").pop() ?? "js";
-                  const file: GeneratedFile = { path, content: "", language: lang };
-                  files.push(file);
-                  onFile(file);
+                  const content = (data.content as string) || "";
+                  // Track file with content from SSE event
+                  const existing = files.find((f) => f.path === path);
+                  if (existing) {
+                    existing.content = content;
+                  } else {
+                    files.push({ path, content, language: lang });
+                  }
                   onProgress("file", path);
                 } else if (data.type === "step") {
                   onProgress("status", data.message);
@@ -167,7 +172,6 @@ export function useSandbox() {
           } else if (path.includes(".")) {
             const lang = path.split(".").pop() ?? "js";
             files.push({ path, content, language: lang });
-            onFile({ path, content, language: lang });
           }
         }
 
@@ -182,8 +186,53 @@ export function useSandbox() {
             existing.content = content;
           } else {
             files.push({ path, content, language: lang });
-            onFile({ path, content, language: lang });
           }
+        }
+
+        // Also try JSON format: parse components array from response
+        try {
+          const jsonMatch = fullResponse.match(/```json\n([\s\S]*?)\n```/) || [null, fullResponse];
+          const jsonStr = jsonMatch[1]?.trim();
+          if (jsonStr && (jsonStr.startsWith('{') || jsonStr.startsWith('['))) {
+            const jsonData = JSON.parse(jsonStr);
+            if (jsonData.components && Array.isArray(jsonData.components)) {
+              // JSON layout mode — content was generated as component templates
+              // Files should already have been populated by apply-ai-code-stream
+              // We'll fetch them from sandbox below if still empty
+            }
+          }
+        } catch {
+          // Not JSON, that's fine
+        }
+
+        // Fallback: fetch file content from sandbox for files still empty
+        const emptyFiles = files.filter((f) => !f.content);
+        if (emptyFiles.length > 0 && sandbox) {
+          try {
+            const fetchRes = await fetch(`/api/get-sandbox-files`);
+            if (fetchRes.ok) {
+              const fetchData = await fetchRes.json();
+              if (fetchData.success && fetchData.files) {
+                for (const file of emptyFiles) {
+                  // Try matching with and without src/ prefix
+                  const content =
+                    fetchData.files[file.path] ||
+                    fetchData.files[`src/${file.path}`] ||
+                    fetchData.files[file.path.replace(/^src\//, "")];
+                  if (content) {
+                    file.content = content;
+                  }
+                }
+              }
+            }
+          } catch {
+            // ignore fetch errors
+          }
+        }
+
+        // NOW call onFile for all files that have content
+        for (const file of files) {
+          onFile(file);
         }
 
       } catch (err) {

@@ -126,7 +126,7 @@ function TreeNodeRow({
         className={cn(
           "w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors group",
           isSelected
-            ? "bg-violet-50 text-violet-700"
+            ? "bg-blue-50 text-blue-700"
             : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
         )}
         style={{ paddingLeft: `${8 + depth * 14}px` }}
@@ -207,7 +207,7 @@ export function FileDirectoryPanel({
       <div className="flex items-center gap-2 h-12 px-3 border-b border-neutral-200 bg-white shrink-0">
         <Files className="size-4 text-neutral-400" />
         <span className="text-xs font-semibold text-neutral-600 uppercase tracking-wider">Files</span>
-        <span className="ml-auto flex items-center px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-600 text-[10px] font-bold">
+        <span className="ml-auto flex items-center px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 text-[10px] font-bold">
           {files.length}
         </span>
       </div>

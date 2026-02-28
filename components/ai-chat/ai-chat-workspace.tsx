@@ -40,6 +40,8 @@ import {
   RotateCcw,
   Loader2,
   Download,
+  Globe,
+  Code2,
 } from "lucide-react";
 
 import type { ChatMessage, ChatSession, AISettings, GeneratedFile, ChatMode } from "./types";
@@ -49,6 +51,7 @@ import type { ChatMessage, ChatSession, AISettings, GeneratedFile, ChatMode } fr
 // ─────────────────────────────────────────────────
 type Device = "desktop" | "tablet" | "mobile";
 type MiddleTab = "files" | "palette";
+type RightView = "code" | "preview";
 
 const DEFAULT_SETTINGS: AISettings = {
   temperature: appConfig.ai.defaultTemperature,
@@ -143,6 +146,7 @@ export function AIChatWorkspace() {
   const [device, setDevice] = useState<Device>("desktop");
   const [isLocked, setIsLocked] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [rightView, setRightView] = useState<RightView>("preview");
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
 
   // ── Panel widths (resizable) ────────────────────
@@ -631,8 +635,8 @@ export function AIChatWorkspace() {
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors",
                       middleTab === "files"
-                        ? "border-violet-500 text-violet-300"
-                        : "border-transparent text-neutral-500 hover:text-neutral-300"
+                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                        : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
                     )}
                   >
                     <Files className="size-3" />
@@ -643,8 +647,8 @@ export function AIChatWorkspace() {
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors",
                       middleTab === "palette"
-                        ? "border-violet-500 text-violet-300"
-                        : "border-transparent text-neutral-500 hover:text-neutral-300"
+                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                        : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
                     )}
                   >
                     <Layers className="size-3" />
@@ -658,7 +662,10 @@ export function AIChatWorkspace() {
                     <FileDirectoryPanel
                       files={generatedFiles}
                       selectedFile={selectedFile}
-                      onFileSelect={(file) => setSelectedFile(file.path)}
+                      onFileSelect={(file) => {
+                        setSelectedFile(file.path);
+                        setRightView("code");
+                      }}
                     />
                   ) : (
                     <ComponentPalette onInsertPrompt={handleInsertComponent} />
@@ -668,62 +675,93 @@ export function AIChatWorkspace() {
 
               <DragHandle onMouseDown={middlePanel.onMouseDown} />
 
-              {/* Panel 3: Preview / Code viewer */}
+              {/* Panel 3: Code / Preview */}
               <div className="flex flex-col flex-1 min-w-0 h-full bg-neutral-50 dark:bg-neutral-950">
-                {/* Toolbar */}
-                <div className="flex items-center gap-2 px-3 py-1.5 border-b border-neutral-200 dark:border-neutral-800 shrink-0 bg-white dark:bg-neutral-950 shadow-sm dark:shadow-none">
-                  {selectedFile && (
-                    <span className="text-[10px] text-neutral-500 font-mono truncate max-w-[140px]">
-                      {selectedFile.split("/").pop()}
-                    </span>
-                  )}
-                  <div className="flex items-center gap-1 ml-auto">
-                    {/* Device toggles */}
-                    {(
-                      [
-                        { d: "desktop" as Device, icon: Monitor },
-                        { d: "tablet" as Device, icon: Tablet },
-                        { d: "mobile" as Device, icon: Smartphone },
-                      ] as const
-                    ).map(({ d, icon: Icon }) => (
-                      <button
-                        key={d}
-                        onClick={() => setDevice(d)}
-                        className={cn(
-                          "p-1.5 rounded-md transition-colors",
-                          device === d
-                            ? "bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm dark:shadow-none border border-neutral-200/60 dark:border-transparent"
-                            : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-                        )}
-                      >
-                        <Icon className="size-3.5" />
-                      </button>
-                    ))}
+                {/* Toolbar with Code/Preview tabs */}
+                <div className="flex items-center border-b border-neutral-200 dark:border-neutral-800 shrink-0 bg-white dark:bg-neutral-950">
+                  {/* Code tab */}
+                  <button
+                    onClick={() => setRightView("code")}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors",
+                      rightView === "code"
+                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                        : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                    )}
+                  >
+                    <Code2 className="size-3" />
+                    Code
+                    {selectedFile && rightView === "code" && (
+                      <span className="ml-1 font-mono text-[10px] text-neutral-400 truncate max-w-[100px]">
+                        {selectedFile.split("/").pop()}
+                      </span>
+                    )}
+                  </button>
 
-                    <div className="w-px h-4 bg-neutral-700 mx-1" />
+                  {/* Preview tab */}
+                  <button
+                    onClick={() => setRightView("preview")}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 text-[11px] font-medium border-b-2 transition-colors",
+                      rightView === "preview"
+                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                        : "border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+                    )}
+                  >
+                    <Globe className="size-3" />
+                    Preview
+                  </button>
 
-                    {/* Lock */}
-                    <button
-                      onClick={() => setIsLocked((v) => !v)}
-                      className={cn(
-                        "p-1.5 rounded-md transition-colors",
-                        isLocked
-                          ? "bg-amber-500/20 text-amber-400"
-                          : "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800"
-                      )}
-                      title={isLocked ? "Buka kunci" : "Kunci preview"}
-                    >
-                      {isLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
-                    </button>
-
-                    {/* Refresh */}
-                    <button
-                      onClick={() => setIframeKey((k) => k + 1)}
-                      className="p-1.5 rounded-md text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors"
-                      title="Refresh preview"
-                    >
-                      <RefreshCw className="size-3.5" />
-                    </button>
+                  {/* Right-side actions */}
+                  <div className="flex items-center gap-1 ml-auto px-2">
+                    {/* Device toggles — only shown in preview */}
+                    {rightView === "preview" && (
+                      <>
+                        {(
+                          [
+                            { d: "desktop" as Device, icon: Monitor },
+                            { d: "tablet" as Device, icon: Tablet },
+                            { d: "mobile" as Device, icon: Smartphone },
+                          ] as const
+                        ).map(({ d, icon: Icon }) => (
+                          <button
+                            key={d}
+                            onClick={() => setDevice(d)}
+                            className={cn(
+                              "p-1.5 rounded-md transition-colors",
+                              device === d
+                                ? "bg-neutral-100 dark:bg-neutral-700 text-neutral-900 dark:text-white shadow-sm border border-neutral-200/60 dark:border-transparent"
+                                : "text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                            )}
+                          >
+                            <Icon className="size-3.5" />
+                          </button>
+                        ))}
+                        <div className="w-px h-4 bg-neutral-200 dark:bg-neutral-700 mx-0.5" />
+                        {/* Lock */}
+                        <button
+                          onClick={() => setIsLocked((v) => !v)}
+                          className={cn(
+                            "p-1.5 rounded-md transition-colors",
+                            isLocked
+                              ? "bg-amber-500/20 text-amber-400"
+                              : "text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                          )}
+                          title={isLocked ? "Buka kunci" : "Kunci preview"}
+                        >
+                          {isLocked ? <Lock className="size-3.5" /> : <LockOpen className="size-3.5" />}
+                        </button>
+                        {/* Refresh */}
+                        <button
+                          onClick={() => setIframeKey((k) => k + 1)}
+                          className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                          title="Refresh preview"
+                        >
+                          <RefreshCw className="size-3.5" />
+                        </button>
+                        <div className="w-px h-4 bg-neutral-200 dark:bg-neutral-700 mx-0.5" />
+                      </>
+                    )}
 
                     {/* Reset */}
                     <button
@@ -733,7 +771,7 @@ export function AIChatWorkspace() {
                         setSelectedFile(null);
                         setMessages([]);
                       }}
-                      className="p-1.5 rounded-md text-neutral-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                      className="p-1.5 rounded-md text-neutral-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                       title="Reset sandbox"
                     >
                       <RotateCcw className="size-3.5" />
@@ -743,7 +781,7 @@ export function AIChatWorkspace() {
                     {generatedFiles.length > 0 && (
                       <button
                         onClick={handleDownloadZip}
-                        className="p-1.5 rounded-md text-neutral-500 hover:text-emerald-400 hover:bg-neutral-800 transition-colors"
+                        className="p-1.5 rounded-md text-neutral-400 hover:text-emerald-500 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                         title="Download ZIP"
                       >
                         <Download className="size-3.5" />
@@ -756,32 +794,39 @@ export function AIChatWorkspace() {
                 <div className="flex-1 min-h-0 relative overflow-hidden">
                   <GenerationProgress isGenerating={(isGenerating && isBuildingMode) || sandbox.isCreating} />
 
-                  {selectedFile && viewedFile?.content ? (
+                  {rightView === "code" ? (
+                    /* ── Code View ── */
                     <CodeViewerPanel
                       file={viewedFile}
-                      onClose={() => setSelectedFile(null)}
+                      onClose={() => {
+                        setSelectedFile(null);
+                        setRightView("preview");
+                      }}
                       className="h-full"
                     />
-                  ) : sandbox.sandboxUrl ? (
-                    <div className="h-full w-full flex items-center justify-center bg-neutral-100/50 dark:bg-neutral-800 pattern-dots pattern-neutral-200 dark:pattern-neutral-700 pattern-size-4 pattern-opacity-100 dark:pattern-opacity-20">
-                      <div
-                        className="h-full overflow-hidden transition-all duration-300 bg-white ring-1 ring-neutral-200 shadow-sm dark:bg-neutral-900 dark:ring-neutral-800 dark:shadow-2xl"
-                        style={{ width: DEVICE_WIDTHS[device] }}
-                      >
-                        <iframe
-                          key={iframeKey}
-                          src={sandbox.sandboxUrl}
-                          className="w-full h-full border-0"
-                          title="Sandbox Preview"
-                          style={{ pointerEvents: isLocked ? "none" : "auto" }}
-                        />
-                      </div>
-                    </div>
                   ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-neutral-600">
-                      <Sparkles className="size-10 mb-4 opacity-20" />
-                      <p className="text-sm">Preview akan muncul setelah kode di-generate</p>
-                    </div>
+                    /* ── Preview View ── */
+                    sandbox.sandboxUrl ? (
+                      <div className="h-full w-full flex items-center justify-center bg-neutral-100/50 dark:bg-neutral-800">
+                        <div
+                          className="h-full overflow-hidden transition-all duration-300 bg-white ring-1 ring-neutral-200 shadow-sm dark:bg-neutral-900 dark:ring-neutral-800 dark:shadow-2xl"
+                          style={{ width: DEVICE_WIDTHS[device] }}
+                        >
+                          <iframe
+                            key={iframeKey}
+                            src={sandbox.sandboxUrl}
+                            className="w-full h-full border-0"
+                            title="Sandbox Preview"
+                            style={{ pointerEvents: isLocked ? "none" : "auto" }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-neutral-400">
+                        <Sparkles className="size-10 mb-4 opacity-20" />
+                        <p className="text-sm">Preview akan muncul setelah kode di-generate</p>
+                      </div>
+                    )
                   )}
                 </div>
               </div>

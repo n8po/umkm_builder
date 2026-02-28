@@ -29,61 +29,90 @@ function getIconColor(path: string) {
 }
 
 /**
- * Very lightweight syntax highlighter — no external deps.
- * Tokenizes code into <span> with color classes.
+ * Lightweight syntax highlighter — tokenizer approach.
+ * Scans code once to collect tokens, then builds HTML in a single pass.
+ * This prevents regex replacements from corrupting each other's HTML.
  */
 function highlightCode(code: string, lang: string): string {
   if (!code) return "";
 
-  const escape = (s: string) =>
+  const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  // For JSON
-  if (lang === "json") {
-    return escape(code)
-      .replace(/"([^"]+)"(?=\s*:)/g, '<span class="text-blue-300">"$1"</span>')
-      .replace(/:\s*"([^"]*)"/g, ': <span class="text-amber-300">"$1"</span>')
-      .replace(/:\s*(\d+\.?\d*)/g, ': <span class="text-emerald-300">$1</span>')
-      .replace(/:\s*(true|false|null)/g, ': <span class="text-purple-300">$1</span>');
-  }
+  // Collect tokens: { start, end, cls }
+  type Token = { start: number; end: number; cls: string };
+  const tokens: Token[] = [];
 
-  // For JS/TS/JSX/TSX
-  const keywords = [
+  const addMatches = (regex: RegExp, cls: string, group = 0) => {
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(code)) !== null) {
+      const s = group > 0 && m[group] !== undefined
+        ? m.index + m[0].indexOf(m[group])
+        : m.index;
+      const len = group > 0 && m[group] !== undefined ? m[group].length : m[0].length;
+      tokens.push({ start: s, end: s + len, cls });
+    }
+  };
+
+  const JS_KEYWORDS = new Set([
     "import", "export", "default", "from", "const", "let", "var", "function",
     "return", "if", "else", "for", "while", "class", "extends", "interface",
     "type", "async", "await", "new", "typeof", "null", "undefined", "true", "false",
-  ];
+  ]);
 
-  let result = escape(code);
+  if (lang === "json") {
+    // JSON: keys, string values, numbers, booleans/null
+    addMatches(/"([^"]+)"(?=\s*:)/g, "text-blue-300");
+    addMatches(/:\s*"([^"]*)"/g, "text-amber-300");
+    addMatches(/:\s*(\d+\.?\d*)/g, "text-emerald-300", 1);
+    addMatches(/:\s*(true|false|null)\b/g, "text-purple-300", 1);
+  } else {
+    // JS/TS/JSX/TSX
 
-  // Strings (double + single + template)
-  result = result
-    .replace(/`([^`]*)`/g, '<span class="text-amber-300">`$1`</span>')
-    .replace(/"([^"]*)"/g, '<span class="text-amber-300">"$1"</span>')
-    .replace(/'([^']*)'/g, '<span class="text-amber-300">\'$1\'</span>');
+    // 1. Comments (highest priority — should not be re-tokenised)
+    addMatches(/\/\/[^\n]*/g, "text-neutral-500 italic");
+    addMatches(/\/\*[\s\S]*?\*\//g, "text-neutral-500 italic");
 
-  // Comments
-  result = result
-    .replace(/(\/\/[^\n]*)/g, '<span class="text-neutral-500 italic">$1</span>')
-    .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-neutral-500 italic">$1</span>');
+    // 2. Strings (template, double, single)
+    addMatches(/`[^`]*`/g, "text-amber-300");
+    addMatches(/"[^"]*"/g, "text-amber-300");
+    addMatches(/'[^']*'/g, "text-amber-300");
 
-  // Keywords
-  keywords.forEach((kw) => {
-    result = result.replace(
-      new RegExp(`\\b(${kw})\\b`, "g"),
-      '<span class="text-purple-300">$1</span>'
-    );
-  });
+    // 3. Keywords (word-boundary matching)
+    addMatches(new RegExp(`\\b(${[...JS_KEYWORDS].join("|")})\\b`, "g"), "text-purple-300");
 
-  // Numbers
-  result = result.replace(/\b(\d+\.?\d*)\b/g, '<span class="text-emerald-300">$1</span>');
+    // 4. Numbers
+    addMatches(/\b\d+\.?\d*\b/g, "text-emerald-300");
 
-  // JSX tags / HTML
-  result = result
-    .replace(/(&lt;\/?)([\w]+)/g, '$1<span class="text-blue-300">$2</span>')
-    .replace(/(\w+)=/g, '<span class="text-sky-300">$1</span>=');
+    // 5. JSX/HTML tags
+    addMatches(/<\/?([A-Za-z][A-Za-z0-9.]*)/g, "text-blue-300", 1);
 
-  return result;
+    // 6. JSX attributes (word=)
+    addMatches(/\b([a-zA-Z_][\w-]*)(?==)/g, "text-sky-300", 1);
+  }
+
+  // Sort by start pos; remove overlapping tokens (earlier/longer wins)
+  tokens.sort((a, b) => a.start - b.start || b.end - a.end);
+  const filtered: Token[] = [];
+  let cursor = 0;
+  for (const t of tokens) {
+    if (t.start >= cursor) {
+      filtered.push(t);
+      cursor = t.end;
+    }
+  }
+
+  // Build HTML in one pass
+  const parts: string[] = [];
+  let pos = 0;
+  for (const t of filtered) {
+    if (t.start > pos) parts.push(esc(code.slice(pos, t.start)));
+    parts.push(`<span class="${t.cls}">${esc(code.slice(t.start, t.end))}</span>`);
+    pos = t.end;
+  }
+  if (pos < code.length) parts.push(esc(code.slice(pos)));
+
+  return parts.join("");
 }
 
 export function CodeViewerPanel({ file, onClose, className }: CodeViewerPanelProps) {

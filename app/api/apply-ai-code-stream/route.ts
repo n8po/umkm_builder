@@ -744,7 +744,8 @@ export async function POST(request: NextRequest) {
             await sendProgress({
               type: 'file-complete',
               fileName: normalizedPath,
-              action: isUpdate ? 'updated' : 'created'
+              action: isUpdate ? 'updated' : 'created',
+              content: fileContent
             });
           } catch (error) {
             if (results.errors) {

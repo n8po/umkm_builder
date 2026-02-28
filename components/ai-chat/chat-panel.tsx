@@ -64,12 +64,12 @@ export function ChatPanel({
         </Button>
 
         {isGenerating && (
-          <div className="flex items-center gap-2 px-3 py-1 bg-violet-50 dark:bg-violet-500/10 rounded-full border border-violet-100 dark:border-violet-500/20">
+          <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 dark:bg-blue-500/10 rounded-full border border-blue-100 dark:border-blue-500/20">
             <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 dark:bg-violet-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-violet-500 dark:bg-violet-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 dark:bg-blue-500 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-blue-500 dark:bg-blue-400" />
             </span>
-            <span className="text-[11px] font-medium text-violet-600 dark:text-violet-400">Generating...</span>
+            <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">Generating...</span>
           </div>
         )}
       </div>

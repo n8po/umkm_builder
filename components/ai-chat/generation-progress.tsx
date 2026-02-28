@@ -111,21 +111,21 @@ export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.92, opacity: 0, y: 16 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-sm mx-4 bg-white rounded-2xl shadow-xl border border-neutral-100 overflow-hidden"
+            className="relative z-10 w-full max-w-sm mx-4 bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden"
           >
-            {/* Gradient top bar */}
-            <div className="h-1 w-full bg-gradient-to-r from-violet-500 via-blue-500 to-purple-500" />
+            {/* Gradient top bar — blue accent sesuai landing page */}
+            <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-blue-400 to-sky-400" />
 
             <div className="p-6">
               {/* Icon + title */}
               <div className="flex items-center gap-3 mb-5">
-                <div className="relative flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 shadow-md">
+                <div className="relative flex size-10 items-center justify-center rounded-xl bg-neutral-900 shadow-md">
                   <Sparkles className="size-5 text-white" />
                   {/* Pulse ring */}
-                  <span className="absolute inset-0 rounded-xl animate-ping bg-violet-400 opacity-30" />
+                  <span className="absolute inset-0 rounded-xl animate-ping bg-neutral-600 opacity-20" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-neutral-900">AI sedang membuat website</p>
+                  <p className="text-sm font-semibold text-neutral-900">Sedang membuat website</p>
                   <p className="text-xs text-neutral-400 mt-0.5">Mohon tunggu sebentar...</p>
                 </div>
               </div>
@@ -145,7 +145,7 @@ export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
                           isDone
                             ? "bg-emerald-100 text-emerald-600"
                             : isCurrent
-                            ? "bg-violet-100 text-violet-600"
+                            ? "bg-blue-50 text-blue-600"
                             : "bg-neutral-100 text-neutral-300"
                         }`}
                       >
@@ -173,7 +173,7 @@ export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
                           {[0, 1, 2].map((dot) => (
                             <span
                               key={dot}
-                              className="size-1 rounded-full bg-violet-400 animate-bounce"
+                              className="size-1 rounded-full bg-blue-400 animate-bounce"
                               style={{ animationDelay: `${dot * 150}ms` }}
                             />
                           ))}
@@ -188,13 +188,13 @@ export function GenerationProgress({ isGenerating }: GenerationProgressProps) {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-neutral-400 font-mono">{fmt(elapsed)}</span>
-                  <span className="text-xs font-semibold text-violet-600">
+                  <span className="text-xs font-semibold text-blue-600">
                     {Math.round(overallProgress)}%
                   </span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-neutral-100 overflow-hidden">
                   <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500"
+                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-sky-400"
                     initial={{ width: "0%" }}
                     animate={{ width: `${overallProgress}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
