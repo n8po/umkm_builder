@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Header } from "@/components/header";
 import { HeroSection } from "@/components/hero-section";
 import { Footer } from "@/components/footer";
@@ -11,10 +11,10 @@ import {
 import { ProductDemoSection } from "@/components/landing-sections";
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("umkm_access_token")?.value;
 
-  if (session) {
+  if (token) {
     redirect("/ai-chat");
   }
 

@@ -104,12 +104,24 @@ export const authRepository = {
     },
 
     /**
-     * Hapus session cookies (logout).
+     * Hapus session cookies (logout) dan bersihkan Supabase session lokal.
      */
     async deleteSession(): Promise<void> {
+        // 1. Bersihkan session backend (custom cookies)
         await apiClient("/api/auth/session", {
             method: "DELETE",
         });
+
+        // 2. Bersihkan session lokal Supabase (agar browser melupakan akun lama)
+        try {
+            const { createBrowserClient } = await import("@supabase/ssr");
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+            const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+            await supabase.auth.signOut();
+        } catch (error) {
+            console.error("Gagal membersihkan Supabase session:", error);
+        }
     },
 
     /**
